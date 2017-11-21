@@ -1,2 +1,8 @@
+import sys
+from corelib import server
+
+config = "config_server.json"
+
 if __name__ == "__main__":
-    print("server")
+    server.run(sys.argv, config)
+
