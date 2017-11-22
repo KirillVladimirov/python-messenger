@@ -12,7 +12,9 @@ def run(args, options_file):
     conf = get_options(args, options_file)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((conf['DEFAULT']['HOST'], conf['DEFAULT']['PORT']))
+    print("create socket...")
     sock.listen(socket.SOMAXCONN)
+    print("server listen...")
     while True:
         conn, _ = sock.accept()
         conn.settimeout(5)
@@ -27,6 +29,7 @@ def run(args, options_file):
                     break
                 print(data.decode("utf8"))
     sock.close()
+    print("server close...")
 
 
 def get_options(args, options_file):

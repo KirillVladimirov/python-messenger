@@ -11,6 +11,7 @@ def run(args, options_file):
     except socket.error as err:
         print("Connection error: {}".format(err))
         sys.exit(2)
+    print("create socket...")
     try:
         message = "Hello server"
         sock.sendall(message.encode("utf8"))
@@ -19,6 +20,7 @@ def run(args, options_file):
     except socket.error as er:
         print("Send data error", er)
     sock.close()
+    print("client close...")
 
 
 def get_options(args, options_file):
