@@ -1,5 +1,6 @@
 import socket
 from corelib import config
+from corelib import jim
 
 
 def run(args, options_file):
@@ -21,13 +22,14 @@ def run(args, options_file):
         with conn:
             while True:
                 try:
-                    data = conn.recv(1024)
+                    msg = conn.recv(1024)
+                    print(jim.unpack(msg))
+                    conn.sendall(response_200())
                 except socket.timeout:
                     print("Close connection by timeout.")
                     break
-                if not data:
+                if not msg:
                     break
-                print(data.decode("utf8"))
     sock.close()
     print("server close...")
 
@@ -47,3 +49,27 @@ def get_options(args, options_file):
         elif opt[0] == "-p":
             options['DEFAULT']['PORT'] = opt[1]
     return options
+
+
+def response_200():
+    msg = {
+        "response": 200,
+        "alert": "Необязательное сообщение/уведомление"
+    }
+    return jim.pack(msg)
+
+
+def response_402():
+    msg = {
+        "response": 402,
+        "error": "This could be wrong password or no account with that name"
+    }
+    return jim.pack(msg)
+
+
+def response_409():
+    msg = {
+        "response": 409,
+        "alert": "Someone is already connected with the given user name"
+    }
+    return jim.pack(msg)
