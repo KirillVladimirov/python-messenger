@@ -1,16 +1,16 @@
 import socketserver
 from corelib import config
-from corelib import jim
+from corelib.jim import JIM, JimResponse
 
 
 class MessengerHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
-        self.data = self.request.recv(1024).strip()
+        data = self.request.recv(1024).strip()
         print("{} wrote:".format(self.client_address[0]))
-        print(self.data)
-        # just send back the same data, but upper-cased
-        self.request.sendall(self.data.upper())
+        print(data)
+        if JIM.unpack(data):
+            self.request.sendall(JimResponse.status_200())
 
 
 class MessengerServer:
@@ -36,23 +36,3 @@ class MessengerServer:
                 options['DEFAULT']['PORT'] = opt[1]
         return options
 
-    def response_200(self):
-        msg = {
-            "response": 200,
-            "alert": "Необязательное сообщение/уведомление"
-        }
-        return jim.pack(msg)
-
-    def response_402(self):
-        msg = {
-            "response": 402,
-            "error": "This could be wrong password or no account with that name"
-        }
-        return jim.pack(msg)
-
-    def response_409(self):
-        msg = {
-            "response": 409,
-            "alert": "Someone is already connected with the given user name"
-        }
-        return jim.pack(msg)

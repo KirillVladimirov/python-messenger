@@ -2,7 +2,7 @@ import socket
 import sys
 import datetime
 from corelib import config
-from corelib import jim
+from corelib.jim import JIM
 from corelib.user import User
 
 
@@ -27,7 +27,7 @@ class MessengerClient:
 
         try:
             msg = sock.recv(1024)
-            print(jim.unpack(msg))
+            print(JIM.unpack(msg))
         except socket.timeout:
             print("Close connection by timeout.")
 
@@ -67,4 +67,4 @@ class MessengerClient:
                 "password": user.password,
             },
         }
-        return jim.pack(msg)
+        return JIM.pack(msg)
