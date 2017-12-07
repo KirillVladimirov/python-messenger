@@ -9,17 +9,20 @@ class MessengerHandler(socketserver.BaseRequestHandler):
 
     """
 
+    clients = set()
+
     def handle(self):
         data = self.request.recv(1024).strip()
         print("{} wrote:".format(self.client_address[0]))
         print(data)
+        self.clients.add(self.request)
         if JIM.unpack(data):
             self.request.sendall(JimResponse.status_200())
 
 
 class MessengerServer:
     """
-
+    TODO Нужно использовать ассинхронный неблокирующий сервер
     """
 
     def __init__(self, args, options_file):
