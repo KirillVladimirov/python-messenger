@@ -5,5 +5,9 @@ config = "config_server.json"
 
 if __name__ == "__main__":
     server = MessengerServer(sys.argv, config)
-    server.run()
-
+    try:
+        print("Server run...")
+        server.run()
+    except KeyboardInterrupt as e:
+        print("Server shutdown...")
+        server.shutdown()
