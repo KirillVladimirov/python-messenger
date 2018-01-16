@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # Import the database object (db) from the main application module
 # We will define this inside /app/__init__.py in the next sections.
 from app import db
@@ -35,5 +37,44 @@ class User(Base):
         self.email = email
         self.password = password
 
+
+
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Integer,
+    String,
+)
+
+from sqlalchemy.orm import relationship
+from app.common import Base
+
+
+class User(Base):
+    """Model of a user."""
+
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    firstname = Column(String)
+    lastname = Column(String)
+    birthdate = Column(DateTime)
+
+    def __init__(self):
+        self.firstname = ''
+        self.lastname = ''
+
     def __repr__(self):
         return '<User %r>' % (self.name)
+
+
+class Article(Base):
+    __tablename__ = 'articles'
+    id = Column(Integer, primary_key=True)
+    comments = relationship("Comment")
+
+
+class Comment(Base):
+    __tablename__ = 'comments'
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey('article.id'))

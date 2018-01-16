@@ -1,9 +1,8 @@
-import sys
-from corelib.server import MessengerServer
+# coding=utf-8
 
-config = "config_server.json"
+import sys
+from app.server import Server
 
 if __name__ == "__main__":
-    server = MessengerServer(sys.argv, config)
+    server = Server(sys.argv)
     server.run()
-

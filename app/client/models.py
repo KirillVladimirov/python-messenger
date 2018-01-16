@@ -1,9 +1,11 @@
+# coding=utf-8
+
 import socket
 import sys
 import datetime
 from app.common import config
 from app.common.jim import JIM
-from corelib.user import User
+from ..common.user import User
 
 
 class MessengerClient:

@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import os
 
 # Define the application directory
@@ -5,6 +7,9 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # Statement for enabling the development environment
 DEBUG = True
+
+# environment (production, development, test)
+environment = 'test'
 
 # Define the database - we are working with
 # SQLite for this example
@@ -26,6 +31,11 @@ CSRF_SESSION_KEY = "secret"
 
 # Secret key for signing cookies
 SECRET_KEY = "secret"
+
+# define host
+host = "127.0.0.1"
+# define port
+port = 8010
 
 # Client
 # {

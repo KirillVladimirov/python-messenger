@@ -1,8 +1,8 @@
-import sys
-from corelib.client import MessengerClient
+# coding=utf-8
 
-config = "config_client.json"
+import sys
+from app.client import Client
 
 if __name__ == "__main__":
-    client = MessengerClient(sys.argv, config)
+    client = Client(sys.argv)
     client.send()
