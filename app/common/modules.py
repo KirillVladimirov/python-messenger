@@ -11,7 +11,7 @@ class Base(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
+    date_updated = db.Column(db.DateTime, default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
 
 
@@ -44,6 +44,7 @@ from sqlalchemy import (
     DateTime,
     Integer,
     String,
+    ForeignKey
 )
 
 from sqlalchemy.orm import relationship
@@ -68,13 +69,13 @@ class User(Base):
         return '<User %r>' % (self.name)
 
 
-class Article(Base):
+class Dialog(Base):
     __tablename__ = 'articles'
     id = Column(Integer, primary_key=True)
     comments = relationship("Comment")
 
 
-class Comment(Base):
+class Message(Base):
     __tablename__ = 'comments'
     id = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article.id'))

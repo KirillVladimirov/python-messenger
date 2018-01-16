@@ -3,7 +3,7 @@ from app.common import config
 from app.common.jim import JIM, JimResponse
 
 
-class MessengerHandler(socketserver.BaseRequestHandler):
+class Handler(socketserver.BaseRequestHandler):
 
     def handle(self):
         data = self.request.recv(1024).strip()
@@ -13,7 +13,7 @@ class MessengerHandler(socketserver.BaseRequestHandler):
             self.request.sendall(JimResponse.status_200())
 
 
-class MessengerServer:
+class Server:
 
     def __init__(self, args, options_file):
         conf = self.__get_options(args, options_file)
@@ -21,7 +21,7 @@ class MessengerServer:
         self.port = conf['DEFAULT']['PORT']
 
     def run(self):
-        with socketserver.TCPServer((self.host, self.port), MessengerHandler) as server:
+        with socketserver.TCPServer((self.host, self.port), Handler) as server:
             # Activate the server; this will keep running until you
             # interrupt the program with Ctrl-C
             server.serve_forever()

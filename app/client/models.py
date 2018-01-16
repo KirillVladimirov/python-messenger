@@ -8,7 +8,7 @@ from app.common.jim import JIM
 from ..common.user import User
 
 
-class MessengerClient:
+class Client:
 
     def __init__(self, args, options_file):
         conf = self.__get_options(args, options_file)
