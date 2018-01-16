@@ -1,12 +1,14 @@
 # coding=utf-8
 
 import unittest
+from app import Application
 
 
-class TestApplication(unittest.TestSuite):
+class TestApplication(unittest.TestCase):
 
     def test_create_app(self):
-        pass
+        app = Application()
+        self.assertEqual(app.name(), 'python_messenger')
 
     def test_available_requirements(self):
         pass
