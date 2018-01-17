@@ -11,37 +11,39 @@ class Application(object):
     def __init__(self):
         self.name = 'python_messenger'
         self.default_config = {
-            'ENV': None,
-            'DEBUG': None,
-            'SECRET_KEY': None,
-            'SERVER_NAME': None,
-            'APPLICATION_ROOT': os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
+            "ENV": None,
+            "DEBUG": None,
+            "SECRET_KEY": None,
+            "SERVER_NAME": None,
+            "APPLICATION_ROOT": os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
         }
         self.config = self.make_config()
 
     def make_config(self):
         defaults = dict(self.default_config)
-        root_path = defaults['APPLICATION_ROOT']
+        root_path = defaults["APPLICATION_ROOT"]
         config = Config(root_path, defaults)
-        config.from_json('config/env.json')
         return config
 
     @property
     def logger(self):
         logger = logging.getLogger(__class__.__name__)
-        if self.config["DEBUG"]:
-            debug_level = logging.DEBUG
+        if self.config["DEBUG_LEVEL"]:
+            debug_level = self.config["DEBUG_LEVEL"]
         else:
             debug_level = logging.ERROR
         logger.setLevel(debug_level)
         # create file handler which logs even debug messages
-        fh = logging.FileHandler(self.config["APPLICATION_ROOT"] + "/logs/" + str(time.strftime("%d_%m_%Y")) + '.log')
+        log_path = os.path.join(self.config["APPLICATION_ROOT"],
+                                "logs",
+                                str(time.strftime("%d_%m_%Y")) + '.log')
+        fh = logging.FileHandler(log_path)
         fh.setLevel(debug_level)
         # create console handler with a higher log level
         ch = logging.StreamHandler()
         ch.setLevel(debug_level)
         # create formatter and add it to the handlers
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
         # add the handlers to the logger
@@ -105,7 +107,3 @@ class Config(dict):
                 if key.isupper():
                     self[key] = value
         return True
-
-
-if __name__ == "__main__":
-    app = Application()

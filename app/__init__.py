@@ -2,26 +2,27 @@
 
 from .application import Application
 from .sqlalchemy import SQLAlchemy
+import os
 
-# Define the WSGI application object
+
 app = Application()
+app.config.from_json("config/env.json")
 
-# Define the database object which is imported
-# by modules and controllers
-db = SQLAlchemy('sqlite:///file.db')
+app.logger.info("Application start ...")
 
-# Configurations
-# app.config.from_object('config')
+if app.config["SQLALCHEMY"]["SCHEMA"] == "sqlite":
+    sql_path = os.path.join(app.config["APPLICATION_ROOT"], "databases", app.config["SQLALCHEMY"]["DB"])
+    sql_uri = "sqlite:///{}".format(sql_path)
+else:
+    err_mes = "Database connection parameters are not set."
+    app.logger.error(err_mes)
+    raise Exception(err_mes)
 
-
-
-# Import a module / component using its blueprint handler variable (mod_auth)
-# from app.server.controllers import mod_auth as auth_module
-
-# Register blueprint(s)
-# app.register_blueprint(auth_module)
-# app.register_blueprint(xyz_module)
-# ..
+db = SQLAlchemy(sql_uri)
+if not db.check_connection():
+    err_mes = "Could not connect to database."
+    app.logger.error(err_mes)
+    raise Exception(err_mes)
 
 # Build the database:
 # This will create the database file using SQLAlchemy
