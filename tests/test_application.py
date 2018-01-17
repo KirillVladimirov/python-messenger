@@ -1,33 +1,32 @@
 # coding=utf-8
 
-import unittest
+from unittest import TestCase, main
+
 from app import Application
+from app import app
+from app import db
 
 
-class TestApplication(unittest.TestCase):
+class TestApplication(TestCase):
 
     def test_create_app(self):
-        app = Application()
-        self.assertEqual(app.name(), 'python_messenger')
+        application = Application()
+        self.assertMultiLineEqual(application.name, 'python_messenger')
 
-    def test_available_requirements(self):
-        pass
+    def test_get_ready_app_object(self):
+        self.assertMultiLineEqual(app.name, 'python_messenger')
+
+    def test_bd_connection(self):
+        self.assertTrue(db.check_connection())
 
     def test_make_config(self):
-        pass
+        self.assertEqual(app.config["SERVER"]["HOST"], "127.0.0.1")
+        self.assertEqual(app.config["SERVER"]["PORT"], 8010)
 
-    def test_set_def_env(self):
-        pass
-
-    def test_set_prod_env(self):
-        pass
-
-    def test_set_test_env(self):
-        pass
-
-    def test_logging(self):
-        pass
+    def test_set_config_attr(self):
+        app.config['GEEK_HOST'] = "https://geekbrains.ru"
+        self.assertEqual(app.config["GEEK_HOST"], "https://geekbrains.ru")
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()

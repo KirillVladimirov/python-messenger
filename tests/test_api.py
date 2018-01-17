@@ -1,13 +1,13 @@
 # coding=utf-8
 
 # Тестирование протокола jim для обмена данными слиент/сервер
-import unittest
+from unittest import TestCase, main
 from app.common import jim
 import app.client
 import app.server
 
 
-class TestJIMFormat(unittest.TestSuite):
+class TestJIMFormat(TestCase):
 
     def test_create_jim_from_message(self):
         pass
@@ -22,7 +22,7 @@ class TestJIMFormat(unittest.TestSuite):
         pass
 
 
-class TestServerApi(unittest.TestSuite):
+class TestServerApi(TestCase):
 
     def test_auth_user(self):
         pass
@@ -56,4 +56,4 @@ class TestServerApi(unittest.TestSuite):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()

@@ -1,10 +1,10 @@
 # coding=utf-8
 
-import unittest
+from unittest import TestCase, main
 import app.server
 
 
-class TestServer(unittest.TestSuite):
+class TestServer(TestCase):
 
     def test_server_config(self):
         pass
@@ -23,4 +23,4 @@ class TestServer(unittest.TestSuite):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()

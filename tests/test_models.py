@@ -1,12 +1,12 @@
 # coding=utf-8
 
-import unittest
+from unittest import TestCase, main
 from app.common import User
 from app.common import Dialog
 from app.common import Message
 
 
-class TestUser(unittest.TestSuite):
+class TestUser(TestCase):
 
     def test_create_user(self):
         user = User("User", "Password")
@@ -35,7 +35,7 @@ class TestUser(unittest.TestSuite):
         pass
 
 
-class TestDialog(unittest.TestSuite):
+class TestDialog(TestCase):
 
     def test_create_dialog(self):
         pass
@@ -50,7 +50,7 @@ class TestDialog(unittest.TestSuite):
         pass
 
 
-class TestMessage(unittest.TestSuite):
+class TestMessage(TestCase):
 
     def test_create_message(self):
         pass
@@ -69,4 +69,4 @@ class TestMessage(unittest.TestSuite):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()

@@ -1,10 +1,10 @@
 # coding=utf-8
 
 # Тестирование Пользовательского интерфейса клиента
-import unittest
+from unittest import TestCase, main
 
 
-class TestGui(unittest.TestSuite):
+class TestGui(TestCase):
 
     def test_gui_default_run(self):
         pass
@@ -29,4 +29,4 @@ class TestGui(unittest.TestSuite):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()
