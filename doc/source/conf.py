@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # python_messenger documentation build configuration file, created by
-# sphinx-quickstart on Thu Jan 18 16:07:26 2018.
+# sphinx-quickstart on Thu Jan 18 23:56:53 2018.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -16,11 +16,11 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
+# print(os.path.abspath('../..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -31,10 +31,9 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.todo',
+extensions = ['sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.autodoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -58,7 +57,7 @@ author = 'Kirill Vladimirov'
 # built documents.
 #
 # The short X.Y version.
-version = '0.1.0'
+version = '0.1'
 # The full version, including alpha/beta/rc tags.
 release = '0.1.0'
 
@@ -86,7 +85,8 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

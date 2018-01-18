@@ -4,6 +4,9 @@ import json
 
 
 class JIM:
+    """
+    JIM base class
+    """
 
     @classmethod
     def pack(cls, dict_msg):
@@ -27,13 +30,25 @@ class JIM:
 
 
 class JimMessage(JIM):
+    """
+    class JimMessage
+    """
+
     pass
 
 
 class JimResponse(JIM):
+    """
+    class JimResponse
+    """
 
     @classmethod
     def status_200(cls):
+        """
+        Message for status 200
+        :return:
+        """
+
         msg = {
             "response": 200,
             "alert": "Необязательное сообщение/уведомление"
@@ -42,6 +57,11 @@ class JimResponse(JIM):
 
     @classmethod
     def status_402(cls):
+        """
+        Message for status 402
+        :return:
+        """
+
         msg = {
             "response": 402,
             "error": "This could be wrong password or no account with that name"
@@ -50,6 +70,11 @@ class JimResponse(JIM):
 
     @classmethod
     def status_409(cls):
+        """
+        Message for status 409
+        :return:
+        """
+
         msg = {
             "response": 409,
             "alert": "Someone is already connected with the given user name"

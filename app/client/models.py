@@ -9,6 +9,9 @@ from ..common.user import User
 
 
 class Client:
+    """
+    Client application class
+    """
 
     def __init__(self, args, options_file):
         conf = self.__get_options(args, options_file)

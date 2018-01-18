@@ -1,1 +1,0 @@
-pyuic5 messanger_window.ui -o messanger_window.py

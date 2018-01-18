@@ -1,9 +1,14 @@
+# coding=utf-8
+
 import socketserver
-from app.common import config
+from app import app
 from app.common.jim import JIM, JimResponse
 
 
 class Handler(socketserver.BaseRequestHandler):
+    """
+    Client request handler
+    """
 
     def handle(self):
         data = self.request.recv(1024).strip()
@@ -14,25 +19,21 @@ class Handler(socketserver.BaseRequestHandler):
 
 
 class Server:
+    """
+    Server application class
+    """
 
     def __init__(self, args, options_file):
-        conf = self.__get_options(args, options_file)
-        self.host = conf['DEFAULT']['HOST']
-        self.port = conf['DEFAULT']['PORT']
+        self.host = app.config['SERVER']['HOST']
+        self.port = app.config['SERVER']['PORT']
 
     def run(self):
+        """
+        Start server main loop
+        :return:
+        """
+
         with socketserver.TCPServer((self.host, self.port), Handler) as server:
             # Activate the server; this will keep running until you
             # interrupt the program with Ctrl-C
             server.serve_forever()
-
-    def __get_options(self, args, options_file):
-        options = config.get_json_options(options_file)
-        cl_options = config.get_command_options(args, "a:p:")
-        for opt in cl_options:
-            if opt[0] == "-a":
-                options['DEFAULT']['HOST'] = opt[1]
-            elif opt[0] == "-p":
-                options['DEFAULT']['PORT'] = opt[1]
-        return options
-
