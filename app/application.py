@@ -7,6 +7,9 @@ import time
 
 
 class Application(object):
+    """
+    Класс приложения, объект которого хранит в себе глобальные настройки проекта.
+    """
 
     def __init__(self):
         self.name = 'python_messenger'
@@ -20,6 +23,10 @@ class Application(object):
         self.config = self.make_config()
 
     def make_config(self):
+        """
+        Создание словаря с глобальными настройками проекта
+        :return:
+        """
         defaults = dict(self.default_config)
         root_path = defaults["APPLICATION_ROOT"]
         config = Config(root_path, defaults)
@@ -27,6 +34,10 @@ class Application(object):
 
     @property
     def logger(self):
+        """
+        Создание объекта логгера
+        :return:
+        """
         logger = logging.getLogger(__class__.__name__)
         if self.config["DEBUG_LEVEL"]:
             debug_level = self.config["DEBUG_LEVEL"]
@@ -53,6 +64,9 @@ class Application(object):
 
 
 class Config(dict):
+    """"
+    Словарь, в котором хранятся настройки приложения
+    """
 
     def __init__(self, root_path, defaults=None):
         dict.__init__(self, defaults or {})
