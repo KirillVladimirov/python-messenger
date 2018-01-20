@@ -1,9 +1,10 @@
 # coding=utf-8
 
-from app import db
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
 from time import time
+
+from geekmessenger.app import db
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Base(db.Base):
@@ -16,7 +17,6 @@ class Base(db.Base):
     id = Column(Integer, primary_key=True)
     date_created = Column(DateTime, default=time())
     date_updated = Column(DateTime, default=time(), onupdate=time())
-
 
 
 class User(Base):

@@ -1,9 +1,9 @@
 # coding=utf-8
 
 import pytest
-from geekmessenger.app.common import User
-from geekmessenger.app.common import Dialog
-from geekmessenger.app.common import Message
+from geekmessenger.app.common.models import User
+from geekmessenger.app.common.models import Dialog
+from geekmessenger.app.common.models import Message
 
 
 class TestUser(object):

@@ -33,7 +33,7 @@ class Application(object):
         return config
 
     @property
-    def logger(self):
+    def logger( self ):
         """
         Создание объекта логгера
         :return:

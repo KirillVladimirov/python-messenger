@@ -2,9 +2,9 @@
 
 # Тестирование протокола jim для обмена данными слиент/сервер
 import pytest
-from app.common import jim
-import app.client
-import app.server
+from geekmessenger.app.common import jim
+import geekmessenger.app.client
+import geekmessenger.app.server
 
 
 class TestJIMFormat(object):
