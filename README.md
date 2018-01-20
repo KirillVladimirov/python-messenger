@@ -1,12 +1,16 @@
-# python-messenger
+Geekmessenge is the simple messenger on Python.
 
-Программа, созданная во время обучения в geekbrains.ru языку python
+- **Source:** https://github.com/KirillVladimirov/python-messenger
+- **Bug reports:** https://github.com/KirillVladimirov/python-messenger/issues
 
-### Установка pytest
-python3 -m venv venv
-source venv/bin/activate # in Windows -> venv\Scripts\activate.bat
-pip install pytest
+**It provides**:
 
-### Установка зависимостей проекта
-pip freeze > requirements.txt
-pip install -r requirements.txt
+- a simple multithreading server, it can listening many clients
+- a simple multithreading client with gui
+- storage client history in locale database
+- authenticate client on server and can dialogs with other clients
+
+Google Python Style Guide:
+http://google.github.io/styleguide/pyguide.html
+http://www.sphinx-doc.org/en/stable/ext/example_google.html#example-google   
+   

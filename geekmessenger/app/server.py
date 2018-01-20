@@ -1,5 +1,16 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 
+"""
+
+
+Example:
+    pass
+
+Todo:
+    * For module TODOs
+    * You have to also use ``sphinx.ext.todo`` extension
+
+"""
 import socketserver
 from app import app
 from app.common.jim import JIM, JimResponse
@@ -23,9 +34,21 @@ class Server:
     Server application class
     """
 
-    def __init__(self, args, options_file):
-        self.host = app.config['SERVER']['HOST']
-        self.port = app.config['SERVER']['PORT']
+    def __init__(self, base_app):
+        """Summary line.
+
+        Extended description of function.
+
+        Args:
+            base_app (int): Description of arg1
+            arg2 (str): Description of arg2
+
+        Returns:
+            bool: Description of return value
+
+        """
+        self.host = base_app.config['SERVER']['HOST']
+        self.port = base_app.config['SERVER']['PORT']
 
     def run(self):
         """
