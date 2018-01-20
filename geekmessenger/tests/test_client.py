@@ -1,10 +1,16 @@
 # coding=utf-8
 
-from unittest import TestCase, main
-import app.client
+import pytest
+import geekmessenger.app.client
 
 
-class TestClient(TestCase):
+class TestClient(object):
+
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
 
     def test_client_config(self):
         pass
@@ -20,7 +26,3 @@ class TestClient(TestCase):
 
     def test_client_can_send_message(self):
         pass
-
-
-if __name__ == '__main__':
-    main()

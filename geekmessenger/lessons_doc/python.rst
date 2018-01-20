@@ -10,3 +10,12 @@ class TestApplication(TestCase):
             yield None
         except exc_type:
             raise self.failureException('{} raised'.format(exc_type.__name__))
+
+pytest
+------
+
+py.test --timeout=300
+
+py.test --cov=myproj tests/
+
+py.test --pep8

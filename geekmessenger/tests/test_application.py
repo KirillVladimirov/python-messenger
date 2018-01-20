@@ -1,13 +1,19 @@
 # coding=utf-8
 
-from unittest import TestCase, main
+import pytest
 
-from app import Application
-from app import app
-from app import db
+from geekmessenger.app import Application
+from geekmessenger.app import app
+from geekmessenger.app import db
 
 
-class TestApplication(TestCase):
+class TestApplication(object):
+
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
 
     def test_create_app(self):
         application = Application()
@@ -26,7 +32,3 @@ class TestApplication(TestCase):
     def test_set_config_attr(self):
         app.config['GEEK_HOST'] = "https://geekbrains.ru"
         self.assertEqual(app.config["GEEK_HOST"], "https://geekbrains.ru")
-
-
-if __name__ == '__main__':
-    main()

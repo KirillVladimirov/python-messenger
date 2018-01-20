@@ -1,12 +1,18 @@
 # coding=utf-8
 
-from unittest import TestCase, main
-from app.common import User
-from app.common import Dialog
-from app.common import Message
+import pytest
+from geekmessenger.app.common import User
+from geekmessenger.app.common import Dialog
+from geekmessenger.app.common import Message
 
 
-class TestUser(TestCase):
+class TestUser(object):
+
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
 
     def test_create_user(self):
         user = User("User", "Password")
@@ -35,7 +41,13 @@ class TestUser(TestCase):
         pass
 
 
-class TestDialog(TestCase):
+class TestDialog(object):
+
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
 
     def test_create_dialog(self):
         pass
@@ -50,7 +62,13 @@ class TestDialog(TestCase):
         pass
 
 
-class TestMessage(TestCase):
+class TestMessage(object):
+
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
 
     def test_create_message(self):
         pass
@@ -67,6 +85,3 @@ class TestMessage(TestCase):
     def test_get_all_messages_by_user_and_date(self):
         pass
 
-
-if __name__ == '__main__':
-    main()

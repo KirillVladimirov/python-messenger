@@ -1,14 +1,20 @@
 # coding=utf-8
 
 # Тестирование Пользовательского интерфейса клиента
-from unittest import TestCase, main
+import pytest
 import sys
 from PyQt5.QtGui import QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
 
-class TestGui(TestCase):
+class TestGui(object):
+
+    def setup_method(self, method):
+        pass
+
+    def teardown_method(self, method):
+        pass
 
     def test_gui_default_run(self):
         """Test the GUI in its default state"""
@@ -84,7 +90,3 @@ class TestGui(TestCase):
 
     def test_receive_message(self):
         pass
-
-
-if __name__ == '__main__':
-    main()
