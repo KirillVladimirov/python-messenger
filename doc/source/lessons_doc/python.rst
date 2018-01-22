@@ -14,6 +14,8 @@ pyqt5
 -----
 pyuic5 messanger_window.ui -o messanger_window.py
 
+pyuic5 geekmessenger\app\client\templates\client_window.ui > geekmessenger\app\client\templates\client_window.py
+
 
 pytest
 ------

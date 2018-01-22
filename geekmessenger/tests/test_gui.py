@@ -4,36 +4,45 @@
 import pytest
 import sys
 from PyQt5.QtWidgets  import QApplication
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-
+from geekmessenger.app.client.templates.client_window import Ui_client_window
 
 class TestGui(object):
 
     def setup_method(self, method):
-        pass
+        """Create the GUI"""
+        self.app = QApplication(sys.argv)
+        self.form = Ui_client_window()
+        self.window = QMainWindow()
+        self.form.setupUi(self.window)
 
     def teardown_method(self, method):
         pass
-    #
-    # def test_gui_default_run(self):
-    #     """Test the GUI in its default state"""
-    #     self.assertEqual(self.form.ui.tequilaScrollBar.value(), 8)
-    #     self.assertEqual(self.form.ui.tripleSecSpinBox.value(), 4)
-    #     self.assertEqual(self.form.ui.limeJuiceLineEdit.text(), "12.0")
-    #     self.assertEqual(self.form.ui.iceHorizontalSlider.value(), 12)
-    #     self.assertEqual(self.form.ui.speedButtonGroup.checkedButton().text(), "&Karate Chop")
-    #
-    #     # Class is in the default state even without pressing OK
-    #     self.assertEqual(self.form.jiggers, 36.0)
-    #     self.assertEqual(self.form.speedName, "&Karate Chop")
-    #
-    #     # Push OK with the left mouse button
-    #     okWidget = self.form.ui.buttonBox.button(self.form.ui.buttonBox.Ok)
-    #     QTest.mouseClick(okWidget, Qt.LeftButton)
-    #     self.assertEqual(self.form.jiggers, 36.0)
-    #     self.assertEqual(self.form.speedName, "&Karate Chop")
-    #
+
+    def test_gui_default_run(self):
+        """Test the GUI in its default state"""
+        assert self.form.send_button.text() == "Отправить"
+        assert self.window.windowTitle() == "Messanger Client"
+        QTest.mouseClick(self.form.send_button, Qt.LeftButton)
+
+        # self.assertEqual(self.form.ui.tequilaScrollBar.value(), 8)
+        # self.assertEqual(self.form.ui.tripleSecSpinBox.value(), 4)
+        # self.assertEqual(self.form.ui.limeJuiceLineEdit.text(), "12.0")
+        # self.assertEqual(self.form.ui.iceHorizontalSlider.value(), 12)
+        # self.assertEqual(self.form.ui.speedButtonGroup.checkedButton().text(), "&Karate Chop")
+        #
+        # # Class is in the default state even without pressing OK
+        # self.assertEqual(self.form.jiggers, 36.0)
+        # self.assertEqual(self.form.speedName, "&Karate Chop")
+        #
+        # # Push OK with the left mouse button
+        # okWidget = self.form.ui.buttonBox.button(self.form.ui.buttonBox.Ok)
+        # QTest.mouseClick(okWidget, Qt.LeftButton)
+        # self.assertEqual(self.form.jiggers, 36.0)
+        # self.assertEqual(self.form.speedName, "&Karate Chop")
+
     # def test_dialogs_scrollbar(self):
     #     """Test the tequila scroll bar"""
     #     self.setFormToZero()

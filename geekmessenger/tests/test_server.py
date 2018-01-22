@@ -56,15 +56,15 @@ class TestServer(object):
 
     def test_handel_request(self):
         code, message = self.server.handel_request(self.REQUEST)
-        self.assertEqual(code, self.CODE_200)
+        assert code, self.CODE_200
 
     def test_handel_wrong_action_request(self):
         code, message = self.server.handel_request(self.WRONG_ACTION_REQUEST)
-        self.assertEqual(code, self.CODE_404)
+        assert code, self.CODE_404
 
     def test_handel_wrong_request(self):
         code, message = self.server.handel_request(self.WRONG_REQUEST)
-        self.assertEqual(code, self.CODE_500)
+        assert code, self.CODE_500
 
     def test_server_can_receive_message(self):
         pass

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>messanger_window_2</class>
- <widget class="QMainWindow" name="messanger_window_2">
+ <class>client_window</class>
+ <widget class="QMainWindow" name="client_window">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -24,7 +24,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QListWidget" name="listWidget">
+       <widget class="QListWidget" name="dialogs_list">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -81,7 +81,7 @@
              </size>
             </property>
             <property name="text">
-             <string/>
+             <string>Отправить</string>
             </property>
             <property name="icon">
              <iconset>
@@ -96,10 +96,6 @@
      </layout>
     </item>
    </layout>
-   <zorder>horizontalLayoutWidget</zorder>
-   <zorder>messanges_list</zorder>
-   <zorder>listWidget</zorder>
-   <zorder>listWidget</zorder>
   </widget>
   <action name="actionsend">
    <property name="icon">

@@ -1,22 +1,55 @@
 # coding=utf-8
 
+import datetime
 import socket
 import sys
-import datetime
-from app.common import config
-from app.common.jim import JIM
-from ..common.user import User
+
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QApplication
+
+from geekmessenger.app import app
+from geekmessenger.app.common.jim import JIM
+from geekmessenger.app.client.templates.client_window import Ui_client_window
 
 
-class Client:
+class Client(object):
     """
     Client application class
     """
 
-    def __init__(self, args, options_file):
-        conf = self.__get_options(args, options_file)
-        self.host = conf['DEFAULT']['HOST']
-        self.port = conf['DEFAULT']['PORT']
+    def __init__(self):
+        self.host = app.config['CLIENT']['HOST']
+        self.port = app.config['CLIENT']['PORT']
+        self.encode = app.config['CLIENT']['ENCODE']
+        self.gui_app = QApplication(sys.argv)
+        self.window = QMainWindow()
+        self.init_ui()
+
+    def run(self):
+        """
+        Run main gui application loop
+        """
+        self.window.show()
+        sys.exit(self.gui_app.exec_())
+
+    def init_ui(self):
+        """
+        Инициализация UI.
+
+        Компоненты UI:
+            dialogs_list - список контактов
+            send_button - кнопка отправки сообщения выбранному контакту
+            messanges_list - переписка, список сообщений переписки с выбранным контактом
+            messanger_edit - строка редактирования сообщения
+        """
+        ui = Ui_client_window()
+        ui.setupUi(self.window)
+        # Connect up the buttons.
+        ui.send_button.clicked.connect(self.send_button_clicked)
+        # self.ui.cancelButton.clicked.connect(self.reject)
+
+    def send_button_clicked(self):
+        print("Кнопка нажата. Функция on_clicked")
 
     def send(self):
         try:
@@ -41,25 +74,6 @@ class Client:
 
         sock.close()
         print("client close...")
-
-    def __get_options(self, args, options_file):
-        """
-        Get server config
-        :param args: Command line arguments
-        :param options_file: Config file name
-        :return: dict
-        """
-        options = config.get_json_options(options_file)
-        cl_options = config.get_command_options(args, "a:p:")
-        for opt in cl_options:
-            if opt[0] == "-a":
-                options['DEFAULT']['HOST'] = opt[1]
-            elif opt[0] == "-p":
-                options['DEFAULT']['PORT'] = opt[1]
-        return options
-
-    def __get_user(self):
-        return User("User", "Password")
 
     def __auth(self):
         user = self.__get_user()
