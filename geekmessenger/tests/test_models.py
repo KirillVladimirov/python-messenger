@@ -1,25 +1,49 @@
 # coding=utf-8
 
 import pytest
+from geekmessenger.app import db
 from geekmessenger.app.common.models import User
-from geekmessenger.app.common.models import Dialog
-from geekmessenger.app.common.models import Message
+# from geekmessenger.app.common.models import Dialog
+# from geekmessenger.app.common.models import Message
+from sqlalchemy.orm import Session
 
 
 class TestUser(object):
 
     def setup_method(self, method):
-        pass
+        sess = db.session
+        user1 = User("User1", "user1@email.com", "Password1")
+        user2 = User("User2", "user2@email.com", "Password2")
+        user3 = User("User3", "user3@email.com", "Password3")
+        sess.add(user1)
+        sess.add(user2)
+        sess.add(user3)
+        sess.commit()
 
     def teardown_method(self, method):
         pass
 
     def test_create_user(self):
-        user = User("User", "Password")
+        user = User("User", "user@email.com", "Password")
         assert user.name == "User"
-        assert user.password == "Password"
+        assert user.email == "user@email.com"
+
+    def test_correct_password(self):
+        user = User("User", "user@email.com", "Password")
+        assert user.correct_password("Password")
+
+    def test_get_user_by_name(self):
+        sess = Session()
+        user1 = sess.query(User).filter_by(id=1).first()
+        assert user1.name == "User1"
+
+    def test_get_user_by_email(self):
+        pass
 
     def test_remove_user(self):
+        sess = Session()
+        sess.delete(user1)
+        sess.commit()
         pass
 
     def test_user_change_password(self):
@@ -28,14 +52,7 @@ class TestUser(object):
     def test_get_user_information(self):
         pass
 
-    def test_get_user_by_name(self):
-        pass
 
-    def test_get_user_by_login(self):
-        pass
-
-    def test_get_user_by_email(self):
-        pass
 
     def test_get_users_list(self):
         pass
