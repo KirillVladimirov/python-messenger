@@ -82,6 +82,20 @@ class Server:
         response_dump = json.dump(response)
         return response_dump.encode(self.encode)
 
+    def handel_request(self, request):
+        if not isinstance(request, str):
+            return 500, "Fail"
+
+        request = json.loads(request)
+        if request['action'] == 'echo':
+            code = 200
+            message = "OK"
+        else:
+            code = 404
+            message = "Fail"
+
+        return code, message
+
 
 class Handler(socketserver.BaseRequestHandler):
     """

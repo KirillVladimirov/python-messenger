@@ -14,13 +14,13 @@ class TestServer(object):
     MESSAGE = "some message"
 
     REQUEST = {'action': 'echo', 'message': 'some message'}
-    REQUEST_NOT_BYTE = "{'action':'echo', 'message': 'some message'}"
+    REQUEST_STR = "{'action':'echo', 'message': 'some message'}"
     REQUEST_BYTES = b"{'action':'echo', 'message': 'some message'}"
 
     RESPONSE = {'code': 200, 'message': 'some message'}
     RESPONSE_BYTES = b"{'code': 200, 'message': 'some message'}"
 
-    WRONG_ACTION_REQUEST = {'action': 'wrong', 'message': 'some message'}
+    WRONG_ACTION_REQUEST = "{'action': 'wrong', 'message': 'some message'}"
     WRONG_REQUEST = b"some wrong message"
 
     def setup_method(self, method):
@@ -33,29 +33,10 @@ class TestServer(object):
         assert isinstance(self.server, Server)
 
     def test_server_run(self):
-        # server = Server(app)
-        # self.assertEqual(server.run(False), 0)
-        # server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-        # ip, port = server.server_address
-        #
-        # # Start a thread with the server -- that thread will then start one
-        # # more thread for each request
-        # server_thread = threading.Thread(target=server.serve_forever)
-        # # Exit the server thread when the main thread terminates
-        # server_thread.daemon = True
-        # server_thread.start()
-        # print("Server loop running in thread:", server_thread.name)
-        #
-        # client(ip, port, "Hello World 1")
-        # client(ip, port, "Hello World 2")
-        # client(ip, port, "Hello World 3")
-        #
-        # server.shutdown()
-        # server.server_close()
         pass
 
     def test_handel_request(self):
-        code, message = self.server.handel_request(self.REQUEST)
+        code, message = self.server.handel_request(self.REQUEST_STR)
         assert code, self.CODE_200
 
     def test_handel_wrong_action_request(self):
