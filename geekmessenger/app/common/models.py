@@ -1,7 +1,6 @@
 # coding=utf-8
 
-from datetime import date
-import time
+import datetime
 
 from geekmessenger.app import app
 from geekmessenger.app import db
@@ -19,8 +18,8 @@ class Base(db.Base):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True)
-    # date_created = Column(DateTime, default=time.time())
-    # date_updated = Column(DateTime, default=time.time(), onupdate=time.time())
+    date_created = Column(DateTime, default=datetime.datetime.now)
+    date_updated = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
 class User(Base):
@@ -31,7 +30,7 @@ class User(Base):
     __tablename__ = 'users'
 
     name = Column(String(128), nullable=False)
-    email = Column(String(128), nullable=False, unique=True)
+    email = Column(String(128), nullable=False, index=True, unique=True)
     password = Column(String(192), nullable=False)
     status = Column(Integer, nullable=True)
 
