@@ -3,8 +3,8 @@
 import pytest
 from geekmessenger.app import db
 from geekmessenger.app.common.models import User
-# from geekmessenger.app.common.models import Dialog
-# from geekmessenger.app.common.models import Message
+from geekmessenger.app.common.models import Dialog
+from geekmessenger.app.common.models import Message
 from sqlalchemy.orm import Session
 
 

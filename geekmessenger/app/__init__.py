@@ -18,7 +18,7 @@ else:
     app.logger.error(err_mes)
     raise Exception(err_mes)
 
-db = SQLAlchemy(sql_uri)
+db = SQLAlchemy(app, sql_uri)
 app.logger.info("Create db object ...")
 if not db.check_connection():
     err_mes = "Could not connect to database."
