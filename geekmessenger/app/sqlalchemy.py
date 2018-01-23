@@ -30,3 +30,9 @@ class SQLAlchemy(object):
             conn.close()
 
         return result
+
+    def create_tables(self):
+        self.Base.metadata.create_all(self.engine)
+
+    def drop_tables(self):
+        self.Base.metadata.drop_all(self.engine)

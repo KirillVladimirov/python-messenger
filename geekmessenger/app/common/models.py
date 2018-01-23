@@ -77,4 +77,5 @@ class Dialog(db.Base):
     comments = relationship("Message")
 
 
-
+if __name__ == "__main__":
+    db.create_tables()

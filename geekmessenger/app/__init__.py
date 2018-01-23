@@ -24,3 +24,7 @@ if not db.check_connection():
     err_mes = "Could not connect to database."
     app.logger.error(err_mes)
     raise Exception(err_mes)
+
+# if not db.engine.dialect.has_table(db.engine, 'users'):  # If table don't exist, Create.
+#     from geekmessenger.app.common import *
+#     db.Base.metadata.create_all()

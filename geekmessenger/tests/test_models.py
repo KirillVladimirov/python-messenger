@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 class TestUser(object):
 
     def setup_method(self, method):
+        db.drop_tables()
+        db.create_tables()
+
         sess = db.session
         user1 = User("User1", "user1@email.com", "Password1")
         user2 = User("User2", "user2@email.com", "Password2")
@@ -21,7 +24,7 @@ class TestUser(object):
         sess.commit()
 
     def teardown_method(self, method):
-        pass
+        db.drop_tables()
 
     def test_create_user(self):
         user = User("User", "user@email.com", "Password")
@@ -33,7 +36,7 @@ class TestUser(object):
         assert user.correct_password("Password")
 
     def test_get_user_by_name(self):
-        sess = Session()
+        sess = db.session
         user1 = sess.query(User).filter_by(id=1).first()
         assert user1.name == "User1"
 
@@ -41,18 +44,16 @@ class TestUser(object):
         pass
 
     def test_remove_user(self):
-        sess = Session()
+        sess = db.session
+        user1 = sess.query(User).filter_by(id=1).first()
         sess.delete(user1)
         sess.commit()
-        pass
 
     def test_user_change_password(self):
         pass
 
     def test_get_user_information(self):
         pass
-
-
 
     def test_get_users_list(self):
         pass
