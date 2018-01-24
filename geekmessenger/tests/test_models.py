@@ -41,22 +41,37 @@ class TestUser(object):
         assert user1.name == "User1"
 
     def test_get_user_by_email(self):
-        pass
+        sess = db.session
+        user2 = sess.query(User).filter_by(email="user2@email.com").first()
+        assert user2.name == "User2"
 
     def test_remove_user(self):
         sess = db.session
-        user1 = sess.query(User).filter_by(id=1).first()
-        sess.delete(user1)
+        user3 = sess.query(User).filter_by(id=3).first()
+        assert user3.name == "User3"
+        sess.delete(user3)
         sess.commit()
+        user3 = sess.query(User).filter_by(id=3).first()
+        assert user3 is None
 
     def test_user_change_password(self):
-        pass
+        sess = db.session
+        user2 = sess.query(User).filter_by(email="user2@email.com").first()
+        assert user2.correct_password("Password2")
+        user2.password = "NewPassword2"
+        sess.commit()
+        assert user2.correct_password("NewPassword2")
 
-    def test_get_user_information(self):
-        pass
+    def test_validate_email(self):
+        sess = db.session
+        user1 = sess.query(User).filter_by(id=1).first()
+        with pytest.raises(AssertionError):
+            user1.email = "Wrong email"
 
-    def test_get_users_list(self):
-        pass
+    def test_get_all_users_list(self):
+        sess = db.session
+        users = sess.query(User).all()
+        assert len(users) == 3
 
 
 class TestDialog(object):
@@ -102,4 +117,3 @@ class TestMessage(object):
 
     def test_get_all_messages_by_user_and_date(self):
         pass
-
