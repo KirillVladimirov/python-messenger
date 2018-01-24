@@ -3,10 +3,9 @@
 import datetime
 import hashlib
 
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Table, Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import validates
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from geekmessenger.app import db
 
@@ -30,10 +29,16 @@ class User(Base):
 
     __tablename__ = 'users'
 
+    __table_args__ = (
+        {'sqlite_autoincrement': True}
+    )
+
     name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False, index=True, unique=True)
     _password = Column("password", String(192), nullable=False)
     status = Column(Integer, nullable=True)
+
+    dialogs = relationship("Dialog", secondary='users_dialogs_association')
 
     def __init__(self, name, email, password):
         """
@@ -76,8 +81,19 @@ class Message(db.Base):
 
     __tablename__ = 'messages'
 
+    __table_args__ = (
+        {'sqlite_autoincrement': True}
+    )
+
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    message = Column(String, nullable=False)
     dialog_id = Column(Integer, ForeignKey('dialogs.id'))
+
+    def __init__(self, message, dialog, user):
+        self.message = message
+        self.dialog_id = dialog.id
+        self.user_id = user.id
 
 
 class Dialog(db.Base):
@@ -87,9 +103,38 @@ class Dialog(db.Base):
 
     __tablename__ = 'dialogs'
 
+    __table_args__ = (
+        {'sqlite_autoincrement': True}
+    )
+
     id = Column(Integer, primary_key=True)
     comments = relationship("Message")
 
+    users = relationship("User", secondary='users_dialogs_association')
+
+
+class AssociationUsersDialogs(Base):
+    """
+    Таблица связи многие ко многим для пользователей и диалогов
+    """
+
+    __tablename__ = 'users_dialogs_association'
+
+    __table_args__ = (
+        {'sqlite_autoincrement': True}
+    )
+
+    id = Column(Integer, primary_key=True)
+
+    user_id = Column(Integer, ForeignKey('users.id'), index=True)
+    dialog_id = Column(Integer, ForeignKey('dialogs.id'), index=True)
+
+    user = relationship("User", backref=backref("dialogs_assoc"))
+    dialog = relationship("Dialog", backref=backref("users_assoc"))
+
 
 if __name__ == "__main__":
+    """
+    Перед вводом в эксплуатацию нужно создать таблици в БД
+    """
     db.create_tables()

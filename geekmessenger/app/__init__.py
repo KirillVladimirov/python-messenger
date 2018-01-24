@@ -14,9 +14,11 @@ if app.config["SQLALCHEMY"]["SCHEMA"] == "sqlite":
     sql_uri = "sqlite:///{}".format(sql_path)
     app.logger.info(sql_uri)
 else:
-    err_mes = "Database connection parameters are not set."
-    app.logger.error(err_mes)
-    raise Exception(err_mes)
+    # err_mes = "Database connection parameters are not set."
+    # app.logger.error(err_mes)
+    # raise Exception(err_mes)
+    sql_uri = "sqlite://"
+    app.logger.info(sql_uri)
 
 db = SQLAlchemy(app, sql_uri)
 app.logger.info("Create db object ...")
