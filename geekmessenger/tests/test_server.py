@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding:utf-8 -*-
 
 import pytest
 from geekmessenger.app import app

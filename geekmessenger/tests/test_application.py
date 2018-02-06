@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding:utf-8 -*-
 
 from geekmessenger.app import Application
 from geekmessenger.app import app
