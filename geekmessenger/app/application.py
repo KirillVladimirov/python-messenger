@@ -1,4 +1,5 @@
-# coding=utf-8
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import os
 import json
@@ -33,7 +34,7 @@ class Application(object):
         return config
 
     @property
-    def logger( self ):
+    def logger(self):
         """
         Создание объекта логгера
         :return:

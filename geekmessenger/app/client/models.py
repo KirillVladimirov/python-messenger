@@ -1,4 +1,5 @@
-# coding=utf-8
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import datetime
 import socket
@@ -6,8 +7,11 @@ import sys
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QFont
 
 from geekmessenger.app import app
+from geekmessenger.app import db
+from geekmessenger.app.common.models import Message
 from geekmessenger.app.common.jim import JIM
 from geekmessenger.app.client.templates.client_window import Ui_client_window
 
@@ -24,6 +28,7 @@ class Client(object):
         self.gui_app = QApplication(sys.argv)
         self.window = QMainWindow()
         self.init_ui()
+        self.font = QFont()
 
     def run(self):
         """
@@ -51,7 +56,14 @@ class Client(object):
     def send_button_clicked(self):
         print("Кнопка нажата. Функция on_clicked")
 
-    def send(self):
+    def send_message(self, request):
+        sess = db.session
+        message = Message(request.message, request.dialog, request.user)
+        sess.add(message)
+        sess.commit()
+        return self.send(message)
+
+    def send(self, message):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((self.host, self.port))

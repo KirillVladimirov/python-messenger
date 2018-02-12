@@ -1,8 +1,9 @@
-# coding=utf-8
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
-import sys
-from app.server import Server
+from geekmessenger.app.client.models import Server
+
 
 if __name__ == "__main__":
-    server = Server(sys.argv)
+    server = Server()
     server.run()

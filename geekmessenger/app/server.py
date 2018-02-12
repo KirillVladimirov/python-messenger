@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -10,6 +11,8 @@ Todo:
 
 """
 import json
+import os
+import sys
 import socket
 import threading
 import socketserver
@@ -41,8 +44,13 @@ class Server:
         Activate the server; this will keep running until you
         interrupt the program with Ctrl-C
         """
-        with socketserver.TCPServer((self.host, self.port), Handler) as server:
+        if not os.path.exists("db"):
+            init_db()
+        try:
+            with socketserver.TCPServer((self.host, self.port), Handler) as server:
                 server.serve_forever()
+        except KeyboardInterrupt:
+            sys.exit()
 
     def get_request(self, request_byte):
         """

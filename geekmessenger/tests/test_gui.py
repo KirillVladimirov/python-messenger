@@ -1,13 +1,15 @@
-# coding=utf-8
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 # Тестирование Пользовательского интерфейса клиента
 import pytest
 import sys
-from PyQt5.QtWidgets  import QApplication
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from geekmessenger.app.client.templates.client_window import Ui_client_window
+
 
 class TestGui(object):
 

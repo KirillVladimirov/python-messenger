@@ -1,9 +1,10 @@
-# coding=utf-8
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import datetime
 import hashlib
 
-from sqlalchemy import Table, Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import validates
 
