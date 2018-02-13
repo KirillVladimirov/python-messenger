@@ -4,10 +4,13 @@
 import datetime
 import socket
 import sys
+import os
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QIcon
 
 from geekmessenger.app import app
 from geekmessenger.app import db
@@ -27,7 +30,7 @@ class Client(object):
         self.encode = app.config['CLIENT']['ENCODE']
         self.gui_app = QApplication(sys.argv)
         self.window = QMainWindow()
-        self.init_ui()
+        self.ui = self.init_ui()
         self.font = QFont()
 
     def run(self):
@@ -35,6 +38,7 @@ class Client(object):
         Run main gui application loop
         """
         self.window.show()
+        self.create_users()
         sys.exit(self.gui_app.exec_())
 
     def init_ui(self):
@@ -52,6 +56,15 @@ class Client(object):
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.send_button_clicked)
         # self.ui.cancelButton.clicked.connect(self.reject)
+        return ui
+
+    def create_users(self):
+        users = ['cnn', 'egor', 'bobr']
+        for user in users:
+            icon = QIcon(os.path.join(app.config.root_path, '..', 'upload', user + '.jpg'))
+            item = QListWidgetItem(user)
+            item.setIcon(icon)
+            self.ui.dialogs_list.addItem(item)
 
     def send_button_clicked(self):
         print("Кнопка нажата. Функция on_clicked")
