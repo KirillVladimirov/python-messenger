@@ -47,14 +47,29 @@ class Client(object):
 
         Компоненты UI:
             dialogs_list - список контактов
-            send_button - кнопка отправки сообщения выбранному контакту
             messanges_list - переписка, список сообщений переписки с выбранным контактом
             messanger_edit - строка редактирования сообщения
+
+            send_button - кнопка отправки сообщения выбранному контакту
+            tb_i - кнопка, курсив
+            tb_b - кнопка, жирный
+            tb_u - кнопка, подчеркнутый
+            tb_smile_1 - кнопка, смаил 1
+            tb_smile_2 - кнопка, смаил 2
+            tb_smile_3 - кнопка, смаил 3
+            tb_smile_4 - кнопка, смаил 4
         """
         ui = Ui_client_window()
         ui.setupUi(self.window)
+        # Set icons
+        ui.tb_b.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
+        ui.tb_i.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
+        ui.tb_u.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
         # Connect up the buttons.
-        ui.send_button.clicked.connect(self.send_button_clicked)
+        ui.send_button.clicked.connect(self.action_send_button_clicked)
+        ui.tb_b.clicked.connect(self.action_bold)
+        ui.tb_i.clicked.connect(self.action_italic)
+        ui.tb_u.clicked.connect(self.action_underlined)
         # self.ui.cancelButton.clicked.connect(self.reject)
         return ui
 
@@ -66,8 +81,24 @@ class Client(object):
             item.setIcon(icon)
             self.ui.dialogs_list.addItem(item)
 
-    def send_button_clicked(self):
-        print("Кнопка нажата. Функция on_clicked")
+    def action_send_button_clicked(self):
+        text = self.ui.messanger_edit.toPlainText()
+        item = QListWidgetItem(text)
+        self.ui.messanges_list.addItem(item)
+        self.ui.messanger_edit.setText('')
+
+    def action_bold(self):
+        text_cursor = self.ui.messanger_edit.textCursor()
+        selected_text = text_cursor.selectedText()
+        self.ui.messanger_edit.insertHtml("<b>" + selected_text + "</b>")
+
+    def action_italic(self):
+        self.myFont.setItalic(True)
+        self.textEdit.setFont(self.myFont)
+
+    def action_underlined(self):
+        self.myFont.setUnderline(True)
+        self.textEdit.setFont(self.myFont)
 
     def send_message(self, request):
         sess = db.session
