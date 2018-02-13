@@ -5,13 +5,17 @@ import datetime
 import socket
 import sys
 import os
-
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QHBoxLayout
+from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QPixmap
 
 from geekmessenger.app import app
 from geekmessenger.app import db
@@ -83,6 +87,8 @@ class Client(object):
         ui.tb_smile_1.clicked.connect(self.action_smile)
         ui.tb_smile_2.clicked.connect(self.action_melancholy)
         ui.tb_smile_3.clicked.connect(self.action_surprise)
+        # Image edit dialog
+        ui.tb_smile_4.clicked.connect(self.action_image_edit)
         return ui
 
     def create_users(self):
@@ -122,6 +128,37 @@ class Client(object):
 
     def action_surprise(self):
         self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ai)
+
+    def action_image_edit(self):
+        # image = Image.open("image.jpg")
+        # draw = ImageDraw.Draw(image)
+        # width = image.size[0]
+        # height = image.size[1]
+        # pix = image.load()
+        #
+        # for i in range(width):
+        #     for j in range(height):
+        #         a = pix[i, j][0]
+        #         b = pix[i, j][1]
+        #         c = pix[i, j][2]
+        #         draw.point((i, j), (255 - a, 255 - b, 255 - c))
+        #
+        # img_tmp = ImageQt(image.convert('RGBA'))
+
+        # pixmap = QPixmap.fromImage(img_tmp)
+
+        # lbl.setPixmap(pixmap)
+
+        dialog = QDialog()
+        lbl = QLabel()
+        bt_return = QPushButton("ok")
+        hbox = QHBoxLayout()
+        hbox.addWidget(lbl)
+        hbox.addWidget(bt_return)
+        dialog.setLayout(hbox)
+        dialog.setWindowTitle('Image Editor')
+        dialog.setWindowModality(Qt.ApplicationModal)
+        dialog.exec_()
 
     def send_message(self, request):
         sess = db.session
