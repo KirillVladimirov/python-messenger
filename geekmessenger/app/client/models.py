@@ -9,6 +9,7 @@ import os
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QListWidgetItem
+from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
 
@@ -30,6 +31,9 @@ class Client(object):
         self.encode = app.config['CLIENT']['ENCODE']
         self.gui_app = QApplication(sys.argv)
         self.window = QMainWindow()
+        self.path_img_ab = os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
+        self.path_img_ac = os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
+        self.path_img_ai = os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
         self.ui = self.init_ui()
         self.font = QFont()
 
@@ -61,16 +65,24 @@ class Client(object):
         """
         ui = Ui_client_window()
         ui.setupUi(self.window)
-        # Set icons
+        # Set icons for font buttons
         ui.tb_b.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
         ui.tb_i.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
         ui.tb_u.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
+        # Set icons for smile buttons
+        ui.tb_smile_1.setIcon(QIcon(self.path_img_ab))
+        ui.tb_smile_2.setIcon(QIcon(self.path_img_ac))
+        ui.tb_smile_3.setIcon(QIcon(self.path_img_ai))
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.action_send_button_clicked)
+        # Connect up the font buttons.
         ui.tb_b.clicked.connect(self.action_bold)
         ui.tb_i.clicked.connect(self.action_italic)
         ui.tb_u.clicked.connect(self.action_underlined)
-        # self.ui.cancelButton.clicked.connect(self.reject)
+        # Connect up smile buttons
+        ui.tb_smile_1.clicked.connect(self.action_smile)
+        ui.tb_smile_2.clicked.connect(self.action_melancholy)
+        ui.tb_smile_3.clicked.connect(self.action_surprise)
         return ui
 
     def create_users(self):
@@ -82,10 +94,10 @@ class Client(object):
             self.ui.dialogs_list.addItem(item)
 
     def action_send_button_clicked(self):
-        text = self.ui.messanger_edit.toPlainText()
-        item = QListWidgetItem(text)
+        text = self.ui.messanger_edit.toHtml()
+        item = QListWidgetItem()
         self.ui.messanges_list.addItem(item)
-        self.ui.messanger_edit.setText('')
+        self.ui.messanger_edit.clear()
 
     def action_bold(self):
         text_cursor = self.ui.messanger_edit.textCursor()
@@ -93,12 +105,23 @@ class Client(object):
         self.ui.messanger_edit.insertHtml("<b>" + selected_text + "</b>")
 
     def action_italic(self):
-        self.myFont.setItalic(True)
-        self.textEdit.setFont(self.myFont)
+        text_cursor = self.ui.messanger_edit.textCursor()
+        selected_text = text_cursor.selectedText()
+        self.ui.messanger_edit.insertHtml("<i>" + selected_text + "</i>")
 
     def action_underlined(self):
-        self.myFont.setUnderline(True)
-        self.textEdit.setFont(self.myFont)
+        text_cursor = self.ui.messanger_edit.textCursor()
+        selected_text = text_cursor.selectedText()
+        self.ui.messanger_edit.insertHtml("<u>" + selected_text + "</u>")
+
+    def action_smile(self):
+        self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ab)
+
+    def action_melancholy(self):
+        self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ac)
+
+    def action_surprise(self):
+        self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ai)
 
     def send_message(self, request):
         sess = db.session
