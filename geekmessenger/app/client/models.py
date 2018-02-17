@@ -93,13 +93,13 @@ class Client(object):
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.action_send_button_clicked)
         # Connect up the font buttons.
-        ui.tb_b.clicked.connect(self.action_bold)
-        ui.tb_i.clicked.connect(self.action_italic)
-        ui.tb_u.clicked.connect(self.action_underlined)
+        ui.tb_b.clicked.connect(lambda: self._insert_html_tag('b'))
+        ui.tb_i.clicked.connect(lambda: self._insert_html_tag('i'))
+        ui.tb_u.clicked.connect(lambda: self._insert_html_tag('u'))
         # Connect up smile buttons
-        ui.tb_smile_1.clicked.connect(self.action_smile)
-        ui.tb_smile_2.clicked.connect(self.action_melancholy)
-        ui.tb_smile_3.clicked.connect(self.action_surprise)
+        ui.tb_smile_1.clicked.connect(lambda: self._insert_image(self.path_img_ab))
+        ui.tb_smile_2.clicked.connect(lambda: self._insert_image(self.path_img_ac))
+        ui.tb_smile_3.clicked.connect(lambda: self._insert_image(self.path_img_ai))
         # Image edit dialog
         ui.tb_smile_4.clicked.connect(self.action_image_edit)
         return ui
@@ -118,32 +118,16 @@ class Client(object):
         self.ui.messanges_list.addItem(item)
         self.ui.messanger_edit.clear()
 
-    def action_bold(self):
-        text_cursor = self.ui.messanger_edit.textCursor()
-        selected_text = text_cursor.selectedText()
-        self.ui.messanger_edit.insertHtml("<b>" + selected_text + "</b>")
-
-    def action_italic(self):
-        text_cursor = self.ui.messanger_edit.textCursor()
-        selected_text = text_cursor.selectedText()
-        self.ui.messanger_edit.insertHtml("<i>" + selected_text + "</i>")
-
-    def action_underlined(self):
-        text_cursor = self.ui.messanger_edit.textCursor()
-        selected_text = text_cursor.selectedText()
-        self.ui.messanger_edit.insertHtml("<u>" + selected_text + "</u>")
-
-    def action_smile(self):
-        self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ab)
-
-    def action_melancholy(self):
-        self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ac)
-
-    def action_surprise(self):
-        self.ui.messanger_edit.insertHtml('<img src="%s" />' % self.path_img_ai)
-
     def action_image_edit(self):
         self.ie_dialog.exec_()
+
+    def _insert_html_tag(self, tag_name):
+        text_cursor = self.ui.messanger_edit.textCursor()
+        selected_text = text_cursor.selectedText()
+        self.ui.messanger_edit.insertHtml("<{tag}>{text}</{tag}>".format(tag=tag_name, text=selected_text))
+
+    def _insert_image(self, image_path):
+        self.ui.messanger_edit.insertHtml('<img src="{image_path}" />'.format(image_path=image_path))
 
     def send_message(self, request):
         sess = db.session
@@ -323,3 +307,24 @@ class ImageEditorDialog(QDialog):
         center_point = QDesktopWidget().availableGeometry().center()
         rectangle.moveCenter(center_point)
         self.move(rectangle.topLeft())
+
+
+class ImageEditor:
+
+    def __init__(self):
+        pass
+
+    def filter_gray(self):
+        pass
+
+    def filter_noise(self):
+        pass
+
+    def filter_negative(self):
+        pass
+
+    def cut_image(self):
+        pass
+
+    def scaling(self):
+        pass
