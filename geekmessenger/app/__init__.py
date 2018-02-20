@@ -15,9 +15,6 @@ if app.config["SQLALCHEMY"]["SCHEMA"] == "sqlite":
     sql_uri = "sqlite:///{}".format(sql_path)
     app.logger.info(sql_uri)
 else:
-    # err_mes = "Database connection parameters are not set."
-    # app.logger.error(err_mes)
-    # raise Exception(err_mes)
     sql_uri = "sqlite://"
     app.logger.info(sql_uri)
 
@@ -27,7 +24,4 @@ if not db.check_connection():
     err_mes = "Could not connect to database."
     app.logger.error(err_mes)
     raise Exception(err_mes)
-
-# if not db.engine.dialect.has_table(db.engine, 'users'):  # If table don't exist, Create.
-#     from geekmessenger.app.common import *
-#     db.Base.metadata.create_all()
+db.create_tables()

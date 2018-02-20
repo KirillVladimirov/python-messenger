@@ -4,10 +4,10 @@
 import pytest
 
 from geekmessenger.app import db
-from geekmessenger.app.common.models import User
-from geekmessenger.app.common.models import Dialog
-from geekmessenger.app.common.models import Message
-from geekmessenger.app.common.models import AssociationUsersDialogs
+from geekmessenger.app.common.message import User
+from geekmessenger.app.common.message import Dialog
+from geekmessenger.app.common.message import Message
+from geekmessenger.app.common.message import AssociationUsersDialogs
 
 
 class TestUser(object):

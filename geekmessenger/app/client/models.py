@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import datetime
-import socket
 import sys
 import os
 import random
+import asyncio
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow
@@ -24,14 +23,19 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QPixmap
 
-from PIL import Image, ImageDraw  # Подключим необходимые библиотеки.
+from PIL import Image as PILImage
+from PIL import ImageDraw as PILImageDraw
 from PIL.ImageQt import ImageQt
 
 from geekmessenger.app import app
-from geekmessenger.app import db
-from geekmessenger.app.common.models import Message
+from geekmessenger.app.common.message import Message
+from geekmessenger.app.common.image import Image
 from geekmessenger.app.common.jim import JIM
 from geekmessenger.app.client.templates.client_window import Ui_client_window
+
+import datetime
+
+from geekmessenger.app import db
 
 
 class Client(object):
@@ -89,7 +93,8 @@ class Client(object):
         ui.tb_smile_2.setIcon(QIcon(self.path_img_ac))
         ui.tb_smile_3.setIcon(QIcon(self.path_img_ai))
         # Set icon for image edit dialog
-        ui.tb_smile_4.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
+        ui.tb_smile_4.setIcon(
+            QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.action_send_button_clicked)
         # Connect up the font buttons.
@@ -134,31 +139,23 @@ class Client(object):
         message = Message(request.message, request.dialog, request.user)
         sess.add(message)
         sess.commit()
-        return self.send(message)
 
-    def send(self, message):
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((self.host, self.port))
-        except socket.error as err:
-            print("Connection error: {}".format(err))
-            sys.exit(2)
-        print("create socket...")
-        msg = self.__auth()
-        sock.sendall(msg)
-        print("send message...")
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.send(message, loop))
+        loop.close()
 
-        try:
-            msg = sock.recv(1024)
-            print(JIM.unpack(msg))
-        except socket.timeout:
-            print("Close connection by timeout.")
-
-        if not msg:
-            print("No response")
-
-        sock.close()
-        print("client close...")
+    async def send(self, message, loop):
+        reader, writer = await asyncio.open_connection(
+            '127.0.0.1',
+            2007,
+            loop=loop
+        )
+        print('Send: %r' % message)
+        writer.write(message.encode())
+        data = await reader.read(100)
+        print('Received: %r' % data.decode())
+        print('Close the socket')
+        writer.close()
 
     def __auth(self):
         user = self.__get_user()
@@ -212,14 +209,23 @@ class ImageEditorDialog(QDialog):
         self.setWindowTitle('Image Editor')
         self.setWindowModality(Qt.ApplicationModal)
 
-    def action_negative(self):
+    def safe_image(self, image):
+        sess = db.session
+        message = Image()
+        sess.add(message)
+        sess.commit()
+        return self.send(message)
+
+    def open_image(self, image_name):
         try:
-            image = Image.open(os.path.join(app.config.root_path, '..', 'upload', 'bobr.jpg'))
+            return PILImage.open(os.path.join(app.config.root_path, '..', 'upload', image_name))
         except FileNotFoundError:
-            print("Wrong file or file path")
+            print("Wrong file or file path for: {}".format(image_name))
             self.reject()
 
-        draw = ImageDraw.Draw(image)
+    def action_negative(self):
+        image = self.open_image('bobr.jpg')
+        draw = PILImageDraw.Draw(image)
         width = image.size[0]
         height = image.size[1]
         pix = image.load()
@@ -237,13 +243,8 @@ class ImageEditorDialog(QDialog):
         self.move_to_center()
 
     def action_noise(self):
-        try:
-            image = Image.open(os.path.join(app.config.root_path, '..', 'upload', 'bobr.jpg'))
-        except FileNotFoundError:
-            print("Wrong file or file path")
-            self.reject()
-
-        draw = ImageDraw.Draw(image)
+        image = self.open_image('bobr.jpg')
+        draw = PILImageDraw.Draw(image)
         width = image.size[0]
         height = image.size[1]
         pix = image.load()
@@ -278,13 +279,8 @@ class ImageEditorDialog(QDialog):
         self.move_to_center()
 
     def action_gray(self):
-        try:
-            image = Image.open(os.path.join(app.config.root_path, '..', 'upload', 'bobr.jpg'))
-        except FileNotFoundError:
-            print("Wrong file or file path")
-            self.reject()
-
-        draw = ImageDraw.Draw(image)
+        image = self.open_image('bobr.jpg')
+        draw = PILImageDraw.Draw(image)
         width = image.size[0]
         height = image.size[1]
         pix = image.load()
@@ -311,11 +307,34 @@ class ImageEditorDialog(QDialog):
 
 class ImageEditor:
 
-    def __init__(self):
-        pass
+    def __init__(self, image):
+        self.image = image
+        self.image_draw = PILImageDraw.Draw(image)
+
+    def filter(self, filter_name):
+        if self.image_draw:
+            method = getattr(self.image_draw, filter_name)
+            return self.method()
+
+        return None
 
     def filter_gray(self):
-        pass
+        width = self.image.size[0]
+        height = self.image.size[1]
+        pix = self.image.load()
+
+        for i in range(width):
+            for j in range(height):
+                a = pix[i, j][0]
+                b = pix[i, j][1]
+                c = pix[i, j][2]
+                S = (a + b + c) // 3
+                self.image_draw.point((i, j), (S, S, S))
+
+        img_tmp = ImageQt(self.image.convert('RGBA'))
+        pixmap = QPixmap.fromImage(img_tmp)
+        self.canvas.setPixmap(pixmap)
+        self.move_to_center()
 
     def filter_noise(self):
         pass
