@@ -10,15 +10,11 @@ Todo:
     * Протестировать генерацию ответа
 
 """
-import json
-import os
-import sys
 import asyncio
-import logging
 import concurrent.futures
-import socketserver
-
-from geekmessenger.app.common.jim import JIM, JimResponse
+from geekmessenger.app import db
+from geekmessenger.app.common.message import Message
+from geekmessenger.app.common.user import User
 
 
 class Server(object):
@@ -56,8 +52,18 @@ class Server(object):
                 data = yield from asyncio.wait_for(reader.read(100), timeout=10.0)
                 message = data.decode()
                 self._logger.info('Received {} from {}'.format(message, peer_name))
-                writer.write(data)
-                writer.drain()
+                result = yield from asyncio.wait_for(self.save_message(message), timeout=10.0)
             except concurrent.futures.TimeoutError:
                 break
         writer.close()
+
+    async def save_message(self, message):
+        print('-----------> print message: {}'.format(message))
+        sess = db.session
+        message = Message.load(message)
+        user = sess.query(User).filter_by(id=message.user_id).first()
+        if user is None:
+            return False
+        sess.add(message)
+        sess.commit()
+        return True

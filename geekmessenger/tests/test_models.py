@@ -4,10 +4,8 @@
 import pytest
 
 from geekmessenger.app import db
-from geekmessenger.app.common.message import User
-from geekmessenger.app.common.message import Dialog
+from geekmessenger.app.common.user import User
 from geekmessenger.app.common.message import Message
-from geekmessenger.app.common.message import AssociationUsersDialogs
 
 
 class TestUser(object):
@@ -82,31 +80,6 @@ class TestUser(object):
         assert len(users) == 3
 
 
-class TestDialog(object):
-
-    def setup_method(self, method):
-        db.drop_tables()
-        db.create_tables()
-
-        sess = db.session
-        sess.commit()
-
-    def teardown_method(self, method):
-        db.drop_tables()
-
-    def test_create_dialog(self):
-        pass
-
-    def test_remove_dialog(self):
-        pass
-
-    def test_get_user_dialogs(self):
-        pass
-
-    def test_all_users_from_dialog(self):
-        pass
-
-
 class TestMessage(object):
 
     def setup_method(self, method):
@@ -126,30 +99,10 @@ class TestMessage(object):
         sess.add(user3)
         sess.commit()
 
-        dialog1 = Dialog()
-        dialog2 = Dialog()
-        sess.add(dialog1)
-        sess.add(dialog2)
-        sess.commit()
-
-        """
-        Создаем диалог между пользователями user1 и user2
-        """
-        user1.dialogs.append(dialog1)
-        user2.dialogs.append(dialog1)
-
-        """
-        Создаем диалог между пользователями user1 и user3
-        """
-        user1.dialogs.append(dialog2)
-        user3.dialogs.append(dialog2)
-
-        sess.commit()
-
-        message1 = Message("Hello world 1", dialog1, user1)
-        message2 = Message("Hello world 2", dialog1, user2)
-        message3 = Message("Hello world 3", dialog2, user1)
-        message4 = Message("Hello world 3", dialog2, user3)
+        message1 = Message("Hello world 1", user1.id)
+        message2 = Message("Hello world 2", user2.id)
+        message3 = Message("Hello world 3", user1.id)
+        message4 = Message("Hello world 3", user3.id)
         sess.add(message1)
         sess.add(message2)
         sess.add(message3)
@@ -157,19 +110,13 @@ class TestMessage(object):
         sess.commit()
 
     def teardown_method(self, method):
-        db.drop_tables()
+        # db.drop_tables()
+        pass
 
     def test_create_message(self):
         sess = db.session
         user1 = sess.query(User).filter_by(id=1).first()
-        user2 = sess.query(User).filter_by(id=2).first()
-        user3 = sess.query(User).filter_by(id=3).first()
-        dialog3 = Dialog()
-        user1.dialogs.append(dialog3)
-        user2.dialogs.append(dialog3)
-        user3.dialogs.append(dialog3)
-        message1 = Message("Hello new world", dialog3, user1)
-        sess.add(dialog3)
+        message1 = Message("Hello new world", user1.id)
         sess.add(message1)
         sess.commit()
         assert message1.message == "Hello new world"
@@ -182,16 +129,6 @@ class TestMessage(object):
         sess.commit()
         message1 = sess.query(Message).filter_by(id=1).first()
         assert message1 is None
-
-    def test_get_all_messages_from_dialog(self):
-        sess = db.session
-        messages = sess.query(Message).filter_by(dialog_id=1).all()
-        assert len(messages) == 2
-
-    def test_get_all_messages_from_dialog_from_user(self):
-        sess = db.session
-        messages = sess.query(Message).filter_by(dialog_id=1, user_id=1).all()
-        assert len(messages) == 1
 
     def test_get_all_messages_by_user_and_date(self):
         pass

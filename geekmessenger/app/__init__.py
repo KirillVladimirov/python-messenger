@@ -25,3 +25,4 @@ if not db.check_connection():
     app.logger.error(err_mes)
     raise Exception(err_mes)
 db.create_tables()
+app.logger.info("Create tables in DB ...")

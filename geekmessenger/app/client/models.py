@@ -29,6 +29,7 @@ from PIL.ImageQt import ImageQt
 
 from geekmessenger.app import app
 from geekmessenger.app.common.message import Message
+from geekmessenger.app.common.user import User
 from geekmessenger.app.common.image import Image
 from geekmessenger.app.common.jim import JIM
 from geekmessenger.app.client.templates.client_window import Ui_client_window
@@ -136,10 +137,15 @@ class Client(object):
         self.ui.messanger_edit.insertHtml('<img src="{image_path}" />'.format(image_path=image_path))
 
     def send(self, message):
-        # sess = db.session
-        message = Message(message, 1)
-        # sess.add(message)
+        sess = db.session
+        # TODO for test
+        # user = User("User", "user@email.com", "Password")
+        # sess.add(user)
         # sess.commit()
+        #
+        message = Message(message, 1)
+        sess.add(message)
+        sess.commit()
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.send_message_to_server(message, loop))
@@ -159,18 +165,9 @@ class Client(object):
         print('Close the socket')
         writer.close()
 
+    # TODO сделать авторизацию на сервере
     def __auth(self):
-        user = self.__get_user()
-        time = datetime.datetime.now()
-        msg = {
-            "action": "authenticate",
-            "time": time.isoformat(),
-            "user": {
-                "account_name": user.name,
-                "password": user.password,
-            },
-        }
-        return JIM.pack(msg)
+        pass
 
 
 class ImageEditorDialog(QDialog):
