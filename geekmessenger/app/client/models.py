@@ -118,7 +118,8 @@ class Client(object):
             self.ui.dialogs_list.addItem(item)
 
     def action_send_button_clicked(self):
-        text = self.ui.messanger_edit.toHtml()
+        text = self.ui.messanger_edit.toPlainText()
+        self.send(text)
         item = QListWidgetItem(text)
         self.ui.messanges_list.addItem(item)
         self.ui.messanger_edit.clear()
@@ -134,22 +135,23 @@ class Client(object):
     def _insert_image(self, image_path):
         self.ui.messanger_edit.insertHtml('<img src="{image_path}" />'.format(image_path=image_path))
 
-    def send_message(self, request):
-        sess = db.session
-        message = Message(request.message, request.dialog, request.user)
-        sess.add(message)
-        sess.commit()
+    def send(self, message):
+        # sess = db.session
+        message = Message(message, 1)
+        # sess.add(message)
+        # sess.commit()
 
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.send(message, loop))
+        loop.run_until_complete(self.send_message_to_server(message, loop))
         loop.close()
 
-    async def send(self, message, loop):
+    async def send_message_to_server(self, message, loop):
         reader, writer = await asyncio.open_connection(
-            '127.0.0.1',
-            2007,
+            host=app.config['CLIENT']['HOST'],
+            port=app.config['CLIENT']['PORT'],
             loop=loop
         )
+        message = str(message)
         print('Send: %r' % message)
         writer.write(message.encode())
         data = await reader.read(100)

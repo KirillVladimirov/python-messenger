@@ -61,13 +61,3 @@ class Server(object):
             except concurrent.futures.TimeoutError:
                 break
         writer.close()
-
-
-if __name__ == '__main__':
-    server = EchoServer('127.0.0.1', 2007)
-    try:
-        server.start()
-    except KeyboardInterrupt:
-        pass  # Press Ctrl+C to stop
-    finally:
-        server.stop()
