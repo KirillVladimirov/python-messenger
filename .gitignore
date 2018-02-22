@@ -109,3 +109,8 @@ venv.bak/
 *.db
 
 .DS_Store
+
+# project folders for runtime
+upload/
+logs/
+database/

@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # Тестирование протокола jim для обмена данными слиент/сервер
-import pytest
-from geekmessenger.app.common import jim
-import geekmessenger.app.client
-import geekmessenger.app.server
 
 
 class TestJIMFormat(object):

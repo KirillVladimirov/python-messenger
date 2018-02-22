@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import pytest
-from geekmessenger.app import app
-from geekmessenger.app.server import Server
+from gbcore import app
+from gbserver.server import Server
 
 
 class TestServer(object):

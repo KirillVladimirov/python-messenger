@@ -27,16 +27,12 @@ from PIL import Image as PILImage
 from PIL import ImageDraw as PILImageDraw
 from PIL.ImageQt import ImageQt
 
-from geekmessenger.app import app
-from geekmessenger.app.common.message import Message
-from geekmessenger.app.common.user import User
-from geekmessenger.app.common.image import Image
-from geekmessenger.app.common.jim import JIM
-from geekmessenger.app.client.templates.client_window import Ui_client_window
+from gbcore import app
+from gbcore.common.message import Message
+from gbcore.common.image import Image
+from gbclient.client import Ui_client_window
 
-import datetime
-
-from geekmessenger.app import db
+from gbcore import db
 
 
 class Client(object):

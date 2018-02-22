@@ -3,9 +3,9 @@
 
 import pytest
 
-from geekmessenger.app import db
-from geekmessenger.app.common.user import User
-from geekmessenger.app.common.message import Message
+from gbcore import db
+from gbcore.common.user import User
+from gbcore.common.message import Message
 
 
 class TestUser(object):

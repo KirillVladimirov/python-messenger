@@ -1,6 +1,6 @@
 
 from sqlalchemy import Column, Integer, BLOB
-from geekmessenger.app.common.base import Base
+from gbcore.common.base import Base
 
 
 class Image(Base):

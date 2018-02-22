@@ -8,3 +8,5 @@ pytest-timeout==1.2.1
 numpy
 pycodestyle
 Pillow
+aiohttp
+aiohttp_security

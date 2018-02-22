@@ -12,9 +12,9 @@ Todo:
 """
 import asyncio
 import concurrent.futures
-from geekmessenger.app import db
-from geekmessenger.app.common.message import Message
-from geekmessenger.app.common.user import User
+from gbcore import db
+from gbcore.common.message import Message
+from gbcore.common.user import User
 
 
 class Server(object):

@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from geekmessenger.app import Application
-from geekmessenger.app import app
-from geekmessenger.app import db
+from gbcore import Application
+from gbcore import app
+from gbcore import db
 
 
 class TestApplication(object):

@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from geekmessenger.app.server import Server
-from geekmessenger.app import app
+from gbserver.server import Server
+from gbcore import app
 
 
 if __name__ == "__main__":

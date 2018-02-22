@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import pytest
-import geekmessenger.app.client
-
 
 class TestClient(object):
 

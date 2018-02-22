@@ -3,7 +3,7 @@
 
 import datetime
 from sqlalchemy import Column, DateTime, Integer
-from geekmessenger.app import db
+from gbcore import db
 
 
 class Base(db.Base):

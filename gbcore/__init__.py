@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from .application import Application
-from .sqlalchemy import SQLAlchemy
+from gbcore.app.application import Application
+from gbcore.sqlalchemy import SQLAlchemy
 import os
 
 
