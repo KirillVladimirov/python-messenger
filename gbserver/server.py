@@ -11,59 +11,91 @@ Todo:
 
 """
 import asyncio
-import concurrent.futures
-from gbcore import db
-from gbcore.common.message import Message
-from gbcore.common.user import User
+from aiohttp import web
+# from gbcore import db
+# from gbcore.common.message import Message
+# from gbcore.common.user import User
 
 
 class Server(object):
     """Server application class"""
 
-    WRONG_MESSAGE_TYPE = "Wrong message type."
-
-    def __init__(self, base_app, loop=None):
+    def __init__(self, base_app):
+        # setup config server
         self._encode = base_app.config['SERVER']['ENCODE']
         self._logger = base_app.logger
-        self._loop = loop or asyncio.get_event_loop()
-        self._server = asyncio.start_server(
-            self.handle_connection,
-            host=base_app.config['SERVER']['HOST'],
-            port=base_app.config['SERVER']['PORT']
+        self._loop = asyncio.get_event_loop()
+        self._port = base_app.config['SERVER']['PORT']
+        self._host = base_app.config['SERVER']['HOST']
+
+        # init web app
+        self._web_app = web.Application(loop=self._loop)
+
+        # # add the routes
+        # web_app.router.add_route('GET', '/', self.root_handler)
+        # web_app.router.add_route('GET', '/registration', self.registration_handler)
+        # web_app.router.add_route('GET', '/{user_id}/', self.user_handler)
+        # web_app.router.add_route('GET', '/{user_id}/message', self.user_update_handler)
+
+    def start(self):
+        """
+        Run server and event loop
+        :return:
+        """
+        self._logger.info("{} | Server start!".format(__name__))
+        web.run_app(
+            self._web_app,
+            host=self._host,
+            port=self._port
         )
 
-    def start(self, and_loop=True):
-        self._server = self._loop.run_until_complete(self._server)
-        self._logger.info('Listening established on {0}'.format(self._server.sockets[0].getsockname()))
-        if and_loop:
-            self._loop.run_forever()
-
-    def stop(self, and_loop=True):
-        self._server.close()
-        if and_loop:
-            self._loop.close()
+    @asyncio.coroutine
+    def root_handler(self):
+        """
+        First request from client after start.
+        Handler is intended only for check server is online
+        :return: None
+        """
+        text = "Successful connection!"
+        return web.Response(body=text.encode(self._encode))
 
     @asyncio.coroutine
-    def handle_connection(self, reader, writer):
-        peer_name = writer.get_extra_info('peername')
-        self._logger.info('Accepted connection from {}'.format(peer_name))
-        while not reader.at_eof():
-            try:
-                data = yield from asyncio.wait_for(reader.read(100), timeout=10.0)
-                message = data.decode()
-                self._logger.info('Received {} from {}'.format(message, peer_name))
-                result = yield from asyncio.wait_for(self.save_message(message), timeout=10.0)
-            except concurrent.futures.TimeoutError:
-                break
-        writer.close()
+    def registration_handler(self, request):
+        text = "Registration completed successfully!"
+        return web.Response(body=text.encode(self._encode))
 
-    async def save_message(self, message):
-        print('-----------> print message: {}'.format(message))
-        sess = db.session
-        message = Message.load(message)
-        user = sess.query(User).filter_by(id=message.user_id).first()
-        if user is None:
-            return False
-        sess.add(message)
-        sess.commit()
-        return True
+    # option 2: auth at a higher level?
+    # set user_id and allowed in the wsgi handler
+    @asyncio.coroutine
+    def user_handler(self, request):
+        name = request.match_info.get('name', "Anonymous")
+        text = "Hello, " + name
+        return web.Response(body=text.encode(self._encode))
+
+    # option 3: super low
+    # wsgi doesn't do anything
+    @asyncio.coroutine
+    def user_update_handler(request):
+        # identity, asked_permission
+        user_id = yield from identity_policy.identify(request)
+        identity = yield from auth_policy.authorized_user_id(user_id)
+        allowed = yield from request.auth_policy.permits(
+            identity, asked_permission
+        )
+        if not allowed:
+            # how is this pluggable as well?
+            # ? return NotAllowedStream()
+            raise NotAllowedResponse()
+
+        update_user()
+
+    # async def save_message(self, message):
+    #     print('-----------> print message: {}'.format(message))
+    #     sess = db.session
+    #     message = Message.load(message)
+    #     user = sess.query(User).filter_by(id=message.user_id).first()
+    #     if user is None:
+    #         return False
+    #     sess.add(message)
+    #     sess.commit()
+    #     return True

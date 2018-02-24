@@ -105,12 +105,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# sqlite files
-*.db
-
 .DS_Store
-
-# project folders for runtime
-upload/
-logs/
-database/

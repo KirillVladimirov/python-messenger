@@ -9,7 +9,7 @@ import time
 
 class Application(object):
     """
-    Класс приложения, объект которого хранит в себе глобальные настройки проекта.
+    Application class for all global config
     """
 
     def __init__(self):
@@ -17,11 +17,14 @@ class Application(object):
         self.default_config = {
             "ENV": None,
             "DEBUG": None,
+            "DEBUG_LEVEL": "DEBUG",
             "SECRET_KEY": None,
             "SERVER_NAME": None,
-            "APPLICATION_ROOT": os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
+            "APPLICATION_ROOT": os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')),
         }
         self.config = self.make_config()
+        logger = Logger.inst(self.config)
+        self.logger = logger.logger
 
     def make_config(self):
         """
@@ -33,20 +36,25 @@ class Application(object):
         config = Config(root_path, defaults)
         return config
 
-    @property
-    def logger(self):
-        """
-        Создание объекта логгера
-        :return:
-        """
+
+class Logger(object):
+    __instance = None
+
+    @staticmethod
+    def inst(config):
+        if Logger.__instance is None:
+            Logger.__instance = Logger(config)
+        return Logger.__instance
+
+    def __init__(self, config):
         logger = logging.getLogger(__class__.__name__)
-        if self.config["DEBUG_LEVEL"]:
-            debug_level = self.config["DEBUG_LEVEL"]
+        if config["DEBUG_LEVEL"]:
+            debug_level = config["DEBUG_LEVEL"]
         else:
             debug_level = logging.ERROR
         logger.setLevel(debug_level)
         # create file handler which logs even debug messages
-        log_path = os.path.join(self.config["APPLICATION_ROOT"],
+        log_path = os.path.join(config["APPLICATION_ROOT"],
                                 "logs",
                                 str(time.strftime("%d_%m_%Y")) + '.log')
         fh = logging.FileHandler(log_path)
@@ -61,7 +69,7 @@ class Application(object):
         # add the handlers to the logger
         logger.addHandler(fh)
         logger.addHandler(ch)
-        return logger
+        self.logger = logger
 
 
 class Config(dict):
