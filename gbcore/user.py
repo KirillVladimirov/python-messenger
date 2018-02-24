@@ -4,7 +4,7 @@
 import hashlib
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import validates
-from gbcore.common.base import Base
+from gbcore.base import Base
 
 
 class User(Base):

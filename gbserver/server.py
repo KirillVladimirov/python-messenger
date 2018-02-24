@@ -30,12 +30,8 @@ class Server(object):
 
         # init web app
         self._web_app = web.Application(loop=self._loop)
-
-        # # add the routes
-        # web_app.router.add_route('GET', '/', self.root_handler)
-        # web_app.router.add_route('GET', '/registration', self.registration_handler)
-        # web_app.router.add_route('GET', '/{user_id}/', self.user_handler)
-        # web_app.router.add_route('GET', '/{user_id}/message', self.user_update_handler)
+        self.setup_routes()
+        self.setup_middlewares()
 
     def start(self):
         """
@@ -49,45 +45,71 @@ class Server(object):
             port=self._port
         )
 
-    @asyncio.coroutine
-    def root_handler(self):
+    def setup_routes(self):
+        self._web_app.router.add_route('GET', '/', self.root_handler)
+        self._web_app.router.add_route('GET', '/registration', self.registration_handler)
+        self._web_app.router.add_route('GET', '/{user_id}/', self.user_handler)
+        self._web_app.router.add_route('GET', '/{user_id}/message', self.user_update_handler)
+
+    def setup_middlewares(self):
+        error_middleware = self.error_pages({
+            404: self.handle_404,
+            500: self.handle_500
+        })
+        self._web_app.middlewares.append(error_middleware)
+
+    async def root_handler(self, request):
         """
         First request from client after start.
         Handler is intended only for check server is online
         :return: None
         """
         text = "Successful connection!"
+        self._logger.info("{} | {}".format(__name__, text))
         return web.Response(body=text.encode(self._encode))
 
-    @asyncio.coroutine
-    def registration_handler(self, request):
+    async def registration_handler(self, request):
         text = "Registration completed successfully!"
+        self._logger.info("{} | {}".format(__name__, text))
         return web.Response(body=text.encode(self._encode))
 
-    # option 2: auth at a higher level?
-    # set user_id and allowed in the wsgi handler
-    @asyncio.coroutine
-    def user_handler(self, request):
+    async def user_handler(self, request):
         name = request.match_info.get('name', "Anonymous")
         text = "Hello, " + name
+        self._logger.info("{} | {}".format(__name__, text))
         return web.Response(body=text.encode(self._encode))
 
-    # option 3: super low
-    # wsgi doesn't do anything
-    @asyncio.coroutine
-    def user_update_handler(request):
-        # identity, asked_permission
-        user_id = yield from identity_policy.identify(request)
-        identity = yield from auth_policy.authorized_user_id(user_id)
-        allowed = yield from request.auth_policy.permits(
-            identity, asked_permission
-        )
-        if not allowed:
-            # how is this pluggable as well?
-            # ? return NotAllowedStream()
-            raise NotAllowedResponse()
+    async def user_update_handler(request):
+        pass
 
-        update_user()
+    def error_pages(self, overrides):
+        async def middleware(app, handler):
+            async def middleware_handler(request):
+                try:
+                    response = await handler(request)
+                    override = overrides.get(response.status)
+                    if override is None:
+                        return response
+                    else:
+                        return await override(request, response)
+                except web.HTTPException as ex:
+                    override = overrides.get(ex.status)
+                    if override is None:
+                        raise
+                    else:
+                        return await override(request, ex)
+
+            return middleware_handler
+
+        return middleware
+
+    async def handle_404(self, request, response):
+        text = '404 error'
+        return web.Response(body=text.encode(self._encode))
+
+    async def handle_500(self, request, response):
+        text = '500 error'
+        return web.Response(body=text.encode(self._encode))
 
     # async def save_message(self, message):
     #     print('-----------> print message: {}'.format(message))

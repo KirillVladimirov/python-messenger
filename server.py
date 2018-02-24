@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from gbserver.server import Server
-from gbcore.app.application import Application
+from gbcore.application import Application
 
 
 if __name__ == "__main__":

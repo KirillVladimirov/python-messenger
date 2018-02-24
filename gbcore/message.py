@@ -3,7 +3,7 @@
 
 import json
 from sqlalchemy import Column, Integer, String, ForeignKey
-from gbcore.common.base import Base
+from gbcore.base import Base
 
 
 class Message(Base):
