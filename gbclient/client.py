@@ -11,12 +11,9 @@ from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
 
-from gbcore import app
 from gbcore.message import Message
 from gbclient.image_editor_dialog import ImageEditorDialog
 from gbclient.templates.client_window import Ui_client_window
-
-from gbcore import db
 
 
 class Client(object):
@@ -24,17 +21,20 @@ class Client(object):
     Client application class
     """
 
-    def __init__(self):
-        self.host = app.config['CLIENT']['HOST']
-        self.port = app.config['CLIENT']['PORT']
-        self.encode = app.config['CLIENT']['ENCODE']
+    def __init__(self, base_app):
+        self.base_app = base_app
+        self.host = base_app.config['CLIENT']['HOST']
+        self.port = base_app.config['CLIENT']['PORT']
+        self.encode = base_app.config['CLIENT']['ENCODE']
+
+        self.path_img_ab = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
+        self.path_img_ac = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
+        self.path_img_ai = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
+
         self.gui_app = QApplication(sys.argv)
         self.window = QMainWindow()
-        self.path_img_ab = os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
-        self.path_img_ac = os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
-        self.path_img_ai = os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
         self.ui = self.init_ui()
-        self.ie_dialog = ImageEditorDialog()
+        self.ie_dialog = ImageEditorDialog(self.base_app)
         self.font = QFont()
 
     def run(self):
@@ -66,16 +66,16 @@ class Client(object):
         ui = Ui_client_window()
         ui.setupUi(self.window)
         # Set icons for font buttons
-        ui.tb_b.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
-        ui.tb_i.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
-        ui.tb_u.setIcon(QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
+        ui.tb_b.setIcon(QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
+        ui.tb_i.setIcon(QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
+        ui.tb_u.setIcon(QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
         # Set icons for smile buttons
         ui.tb_smile_1.setIcon(QIcon(self.path_img_ab))
         ui.tb_smile_2.setIcon(QIcon(self.path_img_ac))
         ui.tb_smile_3.setIcon(QIcon(self.path_img_ai))
         # Set icon for image edit dialog
         ui.tb_smile_4.setIcon(
-            QIcon(os.path.join(app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
+            QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.action_send_button_clicked)
         # Connect up the font buttons.
@@ -93,7 +93,7 @@ class Client(object):
     def create_users(self):
         users = ['cnn', 'egor', 'bobr']
         for user in users:
-            icon = QIcon(os.path.join(app.config.root_path, '..', 'upload', user + '.jpg'))
+            icon = QIcon(os.path.join(self.base_app.config.root_path, '..', 'upload', user + '.jpg'))
             item = QListWidgetItem(user)
             item.setIcon(icon)
             self.ui.dialogs_list.addItem(item)
@@ -117,15 +117,15 @@ class Client(object):
         self.ui.messanger_edit.insertHtml('<img src="{image_path}" />'.format(image_path=image_path))
 
     def send(self, message):
-        sess = db.session
+        # sess = db.session
         # TODO for test
         # user = User("User", "user@email.com", "Password")
         # sess.add(user)
         # sess.commit()
         #
-        message = Message(message, 1)
-        sess.add(message)
-        sess.commit()
+        # message = Message(message, 1)
+        # sess.add(message)
+        # sess.commit()
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.send_message_to_server(message, loop))

@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import time
+from gbcore.sqlalchemy import SQLAlchemy
 
 
 class Application(object):
@@ -12,7 +13,7 @@ class Application(object):
     Application class for all global config
     """
 
-    def __init__(self):
+    def __init__(self, config_path):
         self.name = 'python_messenger'
         self.default_config = {
             "ENV": None,
@@ -20,11 +21,18 @@ class Application(object):
             "DEBUG_LEVEL": "DEBUG",
             "SECRET_KEY": None,
             "SERVER_NAME": None,
-            "APPLICATION_ROOT": os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')),
+            "APPLICATION_ROOT": os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
         }
         self.config = self.make_config()
+
         logger = Logger.inst(self.config)
         self.logger = logger.logger
+        self.config.from_json("config/env.json")
+
+        sql_path = os.path.join(self.config["APPLICATION_ROOT"], "sql", self.config["SQLALCHEMY"]["DB"])
+        sql_uri = "sqlite:///{}".format(sql_path)
+        self.logger.info(sql_uri)
+        self.db = SQLAlchemy(self, sql_uri)
 
     def make_config(self):
         """

@@ -9,9 +9,10 @@ from sqlalchemy.exc import DisconnectionError
 
 class SQLAlchemy(object):
 
+    DB_BASE = declarative_base()
+
     def __init__(self, app, config_db_uri):
         self._app = app
-        self.Base = declarative_base()
         if self._app.config["DEBUG_LEVEL"] == "DEBUG":
             echo = True
         else:
@@ -33,7 +34,7 @@ class SQLAlchemy(object):
         return result
 
     def create_tables(self):
-        self.Base.metadata.create_all(self.engine)
+        self.DB_BASE.metadata.create_all(self.engine)
 
     def drop_tables(self):
-        self.Base.metadata.drop_all(self.engine)
+        self.DB_BASE.metadata.drop_all(self.engine)

@@ -3,10 +3,10 @@
 
 import datetime
 from sqlalchemy import Column, DateTime, Integer
-from gbcore import db
+from gbcore.sqlalchemy import SQLAlchemy
 
 
-class Base(db.Base):
+class Base(SQLAlchemy.DB_BASE):
     """
     Define a base model for other database tables to inherit
     """
