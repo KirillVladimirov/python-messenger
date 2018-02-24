@@ -47,9 +47,9 @@ class Server(object):
 
     def setup_routes(self):
         self._web_app.router.add_route('GET', '/', self.root_handler)
-        self._web_app.router.add_route('GET', '/registration', self.registration_handler)
-        self._web_app.router.add_route('GET', '/{user_id}/', self.user_handler)
-        self._web_app.router.add_route('GET', '/{user_id}/message', self.user_update_handler)
+        self._web_app.router.add_route('POST', '/registration', self.registration_handler)
+        self._web_app.router.add_route('POST', '/{user_id}/', self.user_handler)
+        self._web_app.router.add_route('POST', '/{user_id}/message', self.user_message_handler)
 
     def setup_middlewares(self):
         error_middleware = self.error_pages({
@@ -79,8 +79,10 @@ class Server(object):
         self._logger.info("{} | {}".format(__name__, text))
         return web.Response(body=text.encode(self._encode))
 
-    async def user_update_handler(request):
-        pass
+    async def user_message_handler(request):
+        data = await request.post()
+        self._logger.info("{} | {}".format(__name__, data))
+        return web.Response(body=text.encode(self._encode))
 
     def error_pages(self, overrides):
         async def middleware(app, handler):

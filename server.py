@@ -6,10 +6,9 @@ from gbcore.application import Application
 
 
 if __name__ == "__main__":
-    app = Application()
-    # setup config file
-    app.config.from_json("config/env.json")
+    app = Application("config/env.json")
     app.logger.info("{} | Application start ...".format(__name__))
+
     server = Server(app)
     try:
         server.start()

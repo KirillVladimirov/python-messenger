@@ -3,7 +3,6 @@
 
 import sys
 import os
-import asyncio
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
@@ -14,6 +13,9 @@ from PyQt5.QtGui import QIcon
 from gbcore.message import Message
 from gbclient.image_editor_dialog import ImageEditorDialog
 from gbclient.templates.client_window import Ui_client_window
+import aiohttp
+import asyncio
+import async_timeout
 
 
 class Client(object):
@@ -23,9 +25,10 @@ class Client(object):
 
     def __init__(self, base_app):
         self.base_app = base_app
-        self.host = base_app.config['CLIENT']['HOST']
-        self.port = base_app.config['CLIENT']['PORT']
-        self.encode = base_app.config['CLIENT']['ENCODE']
+        self._logger = base_app.logger
+        self._host = base_app.config['CLIENT']['HOST']
+        self._port = base_app.config['CLIENT']['PORT']
+        self._encode = base_app.config['CLIENT']['ENCODE']
 
         self.path_img_ab = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
         self.path_img_ac = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
@@ -36,6 +39,13 @@ class Client(object):
         self.ui = self.init_ui()
         self.ie_dialog = ImageEditorDialog(self.base_app)
         self.font = QFont()
+        self._loop = asyncio.get_event_loop()
+        future = asyncio.Future()
+        self._loop.run_until_complete(self.check_connection(future))
+        if future.result() == 200:
+            self._logger.info("{} | {}".format(__name__, 'Server online ...'))
+        else:
+            self._logger.info("{} | {}".format(__name__, 'Connection error ...'))
 
     def run(self):
         """
@@ -66,16 +76,20 @@ class Client(object):
         ui = Ui_client_window()
         ui.setupUi(self.window)
         # Set icons for font buttons
-        ui.tb_b.setIcon(QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
-        ui.tb_i.setIcon(QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
-        ui.tb_u.setIcon(QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
+        ui.tb_b.setIcon(QIcon(os.path.join(
+            self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
+        ui.tb_i.setIcon(QIcon(os.path.join(
+            self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
+        ui.tb_u.setIcon(QIcon(os.path.join(
+            self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
         # Set icons for smile buttons
         ui.tb_smile_1.setIcon(QIcon(self.path_img_ab))
         ui.tb_smile_2.setIcon(QIcon(self.path_img_ac))
         ui.tb_smile_3.setIcon(QIcon(self.path_img_ai))
         # Set icon for image edit dialog
         ui.tb_smile_4.setIcon(
-            QIcon(os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
+            QIcon(os.path.join(
+                self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.action_send_button_clicked)
         # Connect up the font buttons.
@@ -100,7 +114,12 @@ class Client(object):
 
     def action_send_button_clicked(self):
         text = self.ui.messanger_edit.toPlainText()
-        self.send(text)
+        future = asyncio.Future()
+        self._loop.run_until_complete(self.send_message(text, future))
+        if future.result() == 200:
+            self._logger.info("{} | {}".format(__name__, 'Message delivered ...'))
+        else:
+            self._logger.info("{} | {}".format(__name__, 'Request error ...'))
         item = QListWidgetItem(text)
         self.ui.messanges_list.addItem(item)
         self.ui.messanger_edit.clear()
@@ -116,7 +135,20 @@ class Client(object):
     def _insert_image(self, image_path):
         self.ui.messanger_edit.insertHtml('<img src="{image_path}" />'.format(image_path=image_path))
 
+    async def check_connection(self, future):
+        async with aiohttp.ClientSession() as session:
+            url = 'http://{host}:{port}/'.format(host=self._host, port=self._port)
+            async with session.get(url) as resp:
+                future.set_result(resp.status)
+
+    async def send_message(self, message, future):
+        async with aiohttp.ClientSession() as session:
+            url = 'http://{host}:{port}/{user_id}/message'.format(host=self._host, port=self._port, user_id=1)
+            async with session.post(url, json=message) as resp:
+                future.set_result(resp.status)
+
     def send(self, message):
+        pass
         # sess = db.session
         # TODO for test
         # user = User("User", "user@email.com", "Password")
@@ -127,23 +159,19 @@ class Client(object):
         # sess.add(message)
         # sess.commit()
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.send_message_to_server(message, loop))
-        loop.close()
-
-    async def send_message_to_server(self, message, loop):
-        reader, writer = await asyncio.open_connection(
-            host=app.config['CLIENT']['HOST'],
-            port=app.config['CLIENT']['PORT'],
-            loop=loop
-        )
-        message = str(message)
-        print('Send: %r' % message)
-        writer.write(message.encode())
-        data = await reader.read(100)
-        print('Received: %r' % data.decode())
-        print('Close the socket')
-        writer.close()
+    # async def send_message_to_server(self, message, loop):
+    #     reader, writer = await asyncio.open_connection(
+    #         host=app.config['CLIENT']['HOST'],
+    #         port=app.config['CLIENT']['PORT'],
+    #         loop=loop
+    #     )
+    #     message = str(message)
+    #     print('Send: %r' % message)
+    #     writer.write(message.encode())
+    #     data = await reader.read(100)
+    #     print('Received: %r' % data.decode())
+    #     print('Close the socket')
+    #     writer.close()
 
     # TODO сделать авторизацию на сервере
     def __auth(self):
