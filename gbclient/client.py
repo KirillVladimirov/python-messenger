@@ -35,9 +35,9 @@ class Client(object):
         self.path_img_ai = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
 
         self.gui_app = QApplication(sys.argv)
-        self.window = QMainWindow()
+        self.window = QMainWindow(self.gui_app)
         self.ui = self.init_ui()
-        self.ie_dialog = ImageEditorDialog(self.base_app)
+        self.ie_dialog = ImageEditorDialog(self.gui_app, self.base_app)
         self.font = QFont()
         self._loop = asyncio.get_event_loop()
         future = asyncio.Future()
