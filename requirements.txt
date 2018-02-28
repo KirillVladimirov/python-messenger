@@ -13,3 +13,6 @@ aiohttp
 cchardet
 aiodns
 aiohttp_security
+pygame
+kivy
+Cython
