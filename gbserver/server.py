@@ -12,6 +12,8 @@ Todo:
 """
 import asyncio
 from aiohttp import web
+
+
 # from gbcore import db
 # from gbcore.common.message import Message
 # from gbcore.common.user import User
@@ -45,6 +47,9 @@ class Server(object):
             port=self._port
         )
 
+    def get_web_app(self):
+        return self._web_app
+
     def setup_routes(self):
         self._web_app.router.add_route('GET', '/', self.root_handler)
         self._web_app.router.add_route('POST', '/registration', self.registration_handler)
@@ -64,9 +69,11 @@ class Server(object):
         Handler is intended only for check server is online
         :return: None
         """
-        text = "Successful connection!"
-        self._logger.info("{} | {}".format(__name__, text))
-        return web.Response(body=text.encode(self._encode))
+        return web.Response(body=b'Hello, world')
+
+        # text = "Successful connection!"
+        # self._logger.info("{} | {}".format(__name__, text))
+        # return web.Response(body=text.encode(self._encode))
 
     async def registration_handler(self, request):
         text = "Registration completed successfully!"
