@@ -1,18 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-"""
-Server processes requests from some clients in multithreading mode
 
-Todo:
-    * Протестировать обработку сообщений
-    * Протестировать конвертацию в json
-    * Протестировать генерацию ответа
-
-"""
 import asyncio
+import os
 from aiohttp import web
-
+from gbserver.routes import routes
+from gbcore.config import make_config
+from gbcore.logger import make_logger
+from motor import motor_asyncio as ma
 
 # from gbcore import db
 # from gbcore.common.message import Message
@@ -20,78 +16,46 @@ from aiohttp import web
 
 
 class Server(object):
-    """Server application class"""
 
-    def __init__(self, base_app):
-        # setup config server
-        self._encode = base_app.config['SERVER']['ENCODE']
-        self._logger = base_app.logger
-        self._loop = asyncio.get_event_loop()
-        self._port = base_app.config['SERVER']['PORT']
-        self._host = base_app.config['SERVER']['HOST']
-
-        # init web app
-        self._web_app = web.Application(loop=self._loop)
+    def __init__(self):
+        self.loop = asyncio.get_event_loop()
+        self.app = web.Application(loop=self.loop)
+        self.app['config'] = make_config(
+            os.path.join('config', 'env.json'))
+        self.encode = self.app['config']['SERVER']['ENCODE']
+        self.logger = make_logger(self.app['config'])
+        self.port = self.app['config']['SERVER']['PORT']
+        self.host = self.app['config']['SERVER']['HOST']
         self.setup_routes()
         self.setup_middlewares()
+        self.app.client = ma.AsyncIOMotorClient(self.app['config']['SERVER']['MONGO_HOST'])
+        self.app.db = self.app.client[self.app['config']['SERVER']['MONGO_DB_NAME']]
+        self.logger.info("Hello! Server application init.")
 
     def start(self):
-        """
-        Run server and event loop
-        :return:
-        """
-        self._logger.info("{} | Server start!".format(__name__))
-        web.run_app(
-            self._web_app,
-            host=self._host,
-            port=self._port
-        )
+        self.logger.info("Server start!")
+        web.run_app(self.app, host=self.host, port=self.port)
 
-    def get_web_app(self):
-        return self._web_app
+    async def stop(self):
+        self.app.client.close()
+        await self.app.shutdown()
+        await self.app.cleanup()
+        self.loop.close()
 
     def setup_routes(self):
-        self._web_app.router.add_route('GET', '/', self.root_handler)
-        self._web_app.router.add_route('POST', '/registration', self.registration_handler)
-        self._web_app.router.add_route('POST', '/{user_id}/', self.user_handler)
-        self._web_app.router.add_route('POST', '/{user_id}/message', self.user_message_handler)
+        for route in routes:
+            self.app.router.add_route(route[0], route[1], route[2], name=route[3])
 
     def setup_middlewares(self):
-        error_middleware = self.error_pages({
+        error_middleware = self.error_pages_middleware({
             404: self.handle_404,
             500: self.handle_500
         })
-        self._web_app.middlewares.append(error_middleware)
+        self.app.middlewares.append(error_middleware)
+        # self.app.middlewares.append(self.authorize_middleware())
+        self.app.middlewares.append(self.db_handler_middleware)
 
-    async def root_handler(self, request):
-        """
-        First request from client after start.
-        Handler is intended only for check server is online
-        :return: None
-        """
-        return web.Response(body=b'Hello, world')
-
-        # text = "Successful connection!"
-        # self._logger.info("{} | {}".format(__name__, text))
-        # return web.Response(body=text.encode(self._encode))
-
-    async def registration_handler(self, request):
-        text = "Registration completed successfully!"
-        self._logger.info("{} | {}".format(__name__, text))
-        return web.Response(body=text.encode(self._encode))
-
-    async def user_handler(self, request):
-        name = request.match_info.get('name', "Anonymous")
-        text = "Hello, " + name
-        self._logger.info("{} | {}".format(__name__, text))
-        return web.Response(body=text.encode(self._encode))
-
-    async def user_message_handler(request):
-        data = await request.post()
-        self._logger.info("{} | {}".format(__name__, data))
-        return web.Response(body=text.encode(self._encode))
-
-    def error_pages(self, overrides):
+    def error_pages_middleware(self, overrides):
         async def middleware(app, handler):
             async def middleware_handler(request):
                 try:
@@ -114,11 +78,40 @@ class Server(object):
 
     async def handle_404(self, request, response):
         text = '404 error'
-        return web.Response(body=text.encode(self._encode))
+        return web.Response(body=text.encode(self.encode))
 
     async def handle_500(self, request, response):
         text = '500 error'
-        return web.Response(body=text.encode(self._encode))
+        return web.Response(body=text.encode(self.encode))
+
+    # async def authorize_middleware(self, handler):
+    #     async def middleware(request):
+    #         def check_path(path):
+    #             result = True
+    #             for r in ['/login', '/signin', '/signout']:
+    #                 if path.startswith(r):
+    #                     result = False
+    #             return result
+    #
+    #         session = await get_session(request)
+    #         if session.get("user"):
+    #             return await handler(request)
+    #         elif check_path(request.path):
+    #             url = request.app.router['login'].url()
+    #             raise web.HTTPFound(url)
+    #             return handler(request)
+    #         else:
+    #             return await handler(request)
+    #
+    #     return middleware
+
+    async def db_handler_middleware(self, app, handler):
+        async def middleware(request):
+            request.db = app.db
+            response = await handler(request)
+            return response
+
+        return middleware
 
     # async def save_message(self, message):
     #     print('-----------> print message: {}'.format(message))

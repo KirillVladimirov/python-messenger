@@ -13,3 +13,4 @@ aiohttp
 cchardet
 aiodns
 aiohttp_security
+motor

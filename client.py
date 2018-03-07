@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from gbclient.client import Client
-from gbcore.application import Application
+from gbcore.config import Application
 
 if __name__ == "__main__":
     app = Application("config/env.json")

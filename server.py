@@ -2,18 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from gbserver.server import Server
-from gbcore.application import Application
-
 
 if __name__ == "__main__":
-    app = Application("config/env.json")
-    app.logger.info("{} | Application start ...".format(__name__))
-
-    server = Server(app)
+    server = Server()
     try:
         server.start()
     except KeyboardInterrupt:
-        # Press Ctrl+C to stop
-        pass
+        server.logger.info("Stop Server begin ...")
     finally:
-        app.logger.info("{} | Application stop. Goodbye!".format(__name__))
+        server.stop()
+        server.logger.info("Server stop. Goodbye!")

@@ -1,19 +1,34 @@
-import pytest
-from aiohttp import web
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 from gbserver.server import Server
-from gbcore.application import Application
 
 
 async def test_hello(test_client):
-    app = Application("config/env.json")
-    app.logger.info("{} | Application start ...".format(__name__))
-
-    server = Server(app)
-    client = await test_client(server.get_web_app())
-    resp = await client.get('/')
+    server = Server()
+    client = await test_client(server.app)
+    resp = await client.get('/test')
     assert resp.status == 200
     text = await resp.text()
-    assert 'Hello, world' in text
+    assert 'Hello, world. Test view.' in text
+
+
+async def test_bd_save(test_client):
+    server = Server()
+    client = await test_client(server.app)
+    resp = await client.get('/testdbsave')
+    assert resp.status == 200
+    text = await resp.text()
+    assert 'Hello, world. Test view.' in text
+
+
+async def test_bd_read(test_client):
+    server = Server()
+    client = await test_client(server.app)
+    resp = await client.get('/testdbread')
+    assert resp.status == 200
+    text = await resp.text()
+    assert 'Hello, world. Test view.' in text
 
 # async def previous(request):
 #     if request.method == 'POST':
