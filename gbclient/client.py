@@ -40,6 +40,8 @@ class Client(object):
         self.ie_dialog = ImageEditorDialog(self.config)
         self.font = QFont()
         asyncio.ensure_future(self.check_connection(), loop=self.loop)
+        self.ws = None
+        asyncio.ensure_future(self.listen_server(), loop=self.loop)
 
     def run(self):
         self.window.show()
@@ -105,37 +107,27 @@ class Client(object):
             self.ui.dialogs_list.addItem(item)
 
     def action_send_button_clicked(self):
-        message = 'hello world.'
-        asyncio.ensure_future(self.send_message(message), loop=self.loop)
-        # text = self.ui.messanger_edit.toPlainText()
-        # future = asyncio.Future()
-        # self._loop.run_until_complete(self.send_message(text, future))
-        # if future.result() == 200:
-        #     self.logger.info("{} | {}".format(__name__, 'Message delivered ...'))
-        # else:
-        #     self.logger.info("{} | {}".format(__name__, 'Request error ...'))
-        # item = QListWidgetItem(text)
-        # self.ui.messanges_list.addItem(item)
-        # self.ui.messanger_edit.clear()
+        message_text = self.ui.messanger_edit.toPlainText()
+        asyncio.ensure_future(self.send_message(message_text), loop=self.loop)
+        self.ui.messanger_edit.clear()
 
     async def send_message(self, message):
+        # session = aiohttp.ClientSession()
+        # async with session.ws_connect('http://{host}:{port}/send'.format(host=self.host, port=self.port)) as ws:
+        await self.ws.send_str(message)
+
+    async def listen_server(self):
         session = aiohttp.ClientSession()
-        async with session.ws_connect('http://{host}:{port}/send'.format(host=self.host, port=self.port)) as ws:
-            await ws.send_str(message)
-            async for msg in ws:
-                if msg.type == aiohttp.WSMsgType.TEXT:
-                    print(msg.data)
-                    if msg.data == 'close':
-                        print('close connection')
-                        await ws.close()
-                        break
-                    else:
-                        # await ws.send_str(message)
-                        print('Received from server: {}'.format(msg.data))
-                elif msg.type == aiohttp.WSMsgType.CLOSED:
-                    break
-                elif msg.type == aiohttp.WSMsgType.ERROR:
-                    break
+        self.ws = await session.ws_connect('http://{host}:{port}/send'.format(host=self.host, port=self.port))
+        async for msg in self.ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                print(msg.data)
+                self.display_message(msg.data)
+            elif msg.type == aiohttp.WSMsgType.CLOSED:
+                break
+            elif msg.type == aiohttp.WSMsgType.ERROR:
+                break
+        await self.ws.close()
 
     async def check_connection(self):
         async with aiohttp.ClientSession() as session:
@@ -146,8 +138,18 @@ class Client(object):
                 else:
                     self.logger.info("{} | {}".format(__name__, 'Connection error ...'))
 
+    async def signup(self):
+        pass
+
     async def signin(self):
         pass
+
+    async def signout(self):
+        pass
+
+    def display_message(self, message):
+        self.ui.messanges_list.addItem(message)
+        print('Received from server: {}'.format(message))
 
     def action_image_edit(self):
         self.ie_dialog.exec_()
