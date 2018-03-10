@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from gbserver.handlers import Test, TestDbSave, TestDbRead
+from gbserver.handlers import Test, TestDbSave, TestDbRead, SignUp, SignIn, SignOut, SocketWorker
 
 # Registration, SignIn, SignOut
 # from auth.views import Login, SignIn, SignOut
@@ -11,11 +11,12 @@ routes = [
     ('GET', '/test', Test, 'test'),
     ('GET', '/testdbsave', TestDbSave, 'test_db_save'),
     ('GET', '/testdbread', TestDbRead, 'test_db_read'),
-    # ('GET', '/registration', Registration, 'login'),
-    # ('GET', '/signin', SignIn, 'signin'),
-    # ('GET', '/signout', SignOut, 'signout'),
+
+    ('POST', '/signup', SignUp, 'signup'),
+    ('POST', '/signin', SignIn, 'signin'),
+    ('POST', '/signout', SignOut, 'signout'),
     # ('GET', '/', ChatList, 'main'),
     # ('GET', '/', ChatList, 'main'),
-    # ('GET', '/ws', WebSocket, 'chat'),
+    ('POST', '/send', SocketWorker, 'socket_worker'),
 
 ]

@@ -9,6 +9,11 @@ from gbserver.routes import routes
 from gbcore.config import make_config
 from gbcore.logger import make_logger
 from motor import motor_asyncio as ma
+from aiohttp_session import session_middleware
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
+import base64
+from cryptography import fernet
+
 
 # from gbcore import db
 # from gbcore.common.message import Message
@@ -30,6 +35,7 @@ class Server(object):
         self.setup_middlewares()
         self.app.client = ma.AsyncIOMotorClient(self.app['config']['SERVER']['MONGO_HOST'])
         self.app.db = self.app.client[self.app['config']['SERVER']['MONGO_DB_NAME']]
+        self.app['websockets'] = []
         self.logger.info("Hello! Server application init.")
 
     def start(self):
@@ -37,6 +43,8 @@ class Server(object):
         web.run_app(self.app, host=self.host, port=self.port)
 
     async def stop(self):
+        for ws in self.app['websockets']:
+            await ws.close(code=1001, message='Server shutdown')
         self.app.client.close()
         await self.app.shutdown()
         await self.app.cleanup()
@@ -54,6 +62,9 @@ class Server(object):
         self.app.middlewares.append(error_middleware)
         # self.app.middlewares.append(self.authorize_middleware())
         self.app.middlewares.append(self.db_handler_middleware)
+        fernet_key = fernet.Fernet.generate_key()
+        secret_key = base64.urlsafe_b64decode(fernet_key)
+        self.app.middlewares.append(session_middleware(EncryptedCookieStorage(secret_key)))
 
     def error_pages_middleware(self, overrides):
         async def middleware(app, handler):
