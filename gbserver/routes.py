@@ -17,6 +17,6 @@ routes = [
     ('POST', '/signout', SignOut, 'signout'),
     # ('GET', '/', ChatList, 'main'),
     # ('GET', '/', ChatList, 'main'),
-    ('POST', '/send', SocketWorker, 'socket_worker'),
+    ('GET', '/send', SocketWorker, 'socket_worker'),
 
 ]

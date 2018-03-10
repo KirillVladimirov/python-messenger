@@ -105,7 +105,8 @@ class Client(object):
             self.ui.dialogs_list.addItem(item)
 
     def action_send_button_clicked(self):
-        asyncio.ensure_future(self.send_message('new'), loop=self.loop)
+        message = 'hello world.'
+        asyncio.ensure_future(self.send_message(message), loop=self.loop)
         # text = self.ui.messanger_edit.toPlainText()
         # future = asyncio.Future()
         # self._loop.run_until_complete(self.send_message(text, future))
@@ -118,11 +119,23 @@ class Client(object):
         # self.ui.messanger_edit.clear()
 
     async def send_message(self, message):
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://api.github.com/events') as resp:
-                print(resp.status)
-                print(message)
-                print(await resp.text())
+        session = aiohttp.ClientSession()
+        async with session.ws_connect('http://{host}:{port}/send'.format(host=self.host, port=self.port)) as ws:
+            await ws.send_str(message)
+            async for msg in ws:
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    print(msg.data)
+                    if msg.data == 'close':
+                        print('close connection')
+                        await ws.close()
+                        break
+                    else:
+                        # await ws.send_str(message)
+                        print('Received from server: {}'.format(msg.data))
+                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                    break
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    break
 
     async def check_connection(self):
         async with aiohttp.ClientSession() as session:
@@ -132,6 +145,9 @@ class Client(object):
                     self.logger.info("{} | {}".format(__name__, 'Server online ...'))
                 else:
                     self.logger.info("{} | {}".format(__name__, 'Connection error ...'))
+
+    async def signin(self):
+        pass
 
     def action_image_edit(self):
         self.ie_dialog.exec_()

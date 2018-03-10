@@ -40,43 +40,51 @@ class TestDbRead(web.View):
 
 class SocketWorker(web.View):
 
-    async def post(self):
+    async def get(self):
         data = await self.request.post()
-        user_id = data.get('id')
-        print(data.get('id'))
+        # user_id = data.get('id')
+        # print(data.get('id'))
         print('ws')
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
         session = await get_session(self.request)
         print(session)
-        user = User(self.request.db, id=user_id)
-        print(user)
-        user.get()
-        print(user.login)
-        login = await user.get_login()
-
+        # user = User(self.request.db, id=user_id)
+        # print(user)
+        # user.get()
+        # print(user.login)
+        # login = await user.get_login()
+        login = 'user1'
         for _ws in self.request.app['websockets']:
-            _ws.send_str('%s joined' % login)
+            _ws.send_str('{} joined.'.format(login))
         self.request.app['websockets'].append(ws)
-
+        print(self.request.app['websockets'])
+        # async for msg in ws:
+        #     if msg.tp == WSMsgType.TEXT:
+        #         if msg.data == 'close':
+        #             await ws.close()
+        #         else:
+        #             message = Message(self.request.db)
+        #             result = await message.save(user=login, msg=msg.data)
+        #             print(result)
+        #             for _ws in self.request.app['websockets']:
+        #                 _ws.send_str('(%s) %s' % (login, msg.data))
+        #     elif msg.tp == WSMsgType.ERROR:
+        #         print(ws.exception())
         async for msg in ws:
-            if msg.tp == WSMsgType.TEXT:
+            if msg.type == WSMsgType.TEXT:
+                print('Received from client: {}'.format(msg.data))
                 if msg.data == 'close':
                     await ws.close()
                 else:
-                    message = Message(self.request.db)
-                    result = await message.save(user=login, msg=msg.data)
-                    print(result)
                     for _ws in self.request.app['websockets']:
-                        _ws.send_str('(%s) %s' % (login, msg.data))
-            elif msg.tp == WSMsgType.ERROR:
-                print(ws.exception())
+                        await _ws.send_str('{}/answer.'.format(msg.data))
+                    print('broadcast completed.')
 
         self.request.app['websockets'].remove(ws)
         for _ws in self.request.app['websockets']:
-            _ws.send_str('%s disconected' % login)
-        print('websocket connection closed')
-
+            await _ws.send_str('{} disconnected.'.format(login))
+        print('websocket connection closed.')
         return ws
 
 
