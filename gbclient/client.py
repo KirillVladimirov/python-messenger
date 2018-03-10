@@ -3,14 +3,16 @@
 
 import sys
 import os
+import aiohttp
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
-
-from gbcore.message import Message
+from quamash import QEventLoop, QThreadExecutor
+from gbcore.config import make_config
+from gbcore.logger import make_logger
 from gbclient.image_editor_dialog import ImageEditorDialog
 from gbclient.templates.client_window import Ui_client_window
 import aiohttp
@@ -23,29 +25,33 @@ class Client(object):
     Client application class
     """
 
-    def __init__(self, base_app):
-        self.base_app = base_app
-        self._logger = base_app.logger
-        self._host = base_app.config['CLIENT']['HOST']
-        self._port = base_app.config['CLIENT']['PORT']
-        self._encode = base_app.config['CLIENT']['ENCODE']
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.loop = QEventLoop(self.app)
+        asyncio.set_event_loop(self.loop)
 
-        self.path_img_ab = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
-        self.path_img_ac = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
-        self.path_img_ai = os.path.join(base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
+        self.config = make_config(
+            os.path.join('config', 'env.json'))
+        self.logger = make_logger(self.config)
+        self.port = self.config['CLIENT']['PORT']
+        self.host = self.config['CLIENT']['HOST']
+        self.encode = self.config['CLIENT']['ENCODE']
 
-        self.gui_app = QApplication(sys.argv)
+        self.path_img_ab = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
+        self.path_img_ac = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
+        self.path_img_ai = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
+
         self.window = QMainWindow()
         self.ui = self.init_ui()
-        self.ie_dialog = ImageEditorDialog(self.base_app)
+        self.ie_dialog = ImageEditorDialog(self.config)
         self.font = QFont()
         self._loop = asyncio.get_event_loop()
         future = asyncio.Future()
         self._loop.run_until_complete(self.check_connection(future))
         if future.result() == 200:
-            self._logger.info("{} | {}".format(__name__, 'Server online ...'))
+            self.logger.info("{} | {}".format(__name__, 'Server online ...'))
         else:
-            self._logger.info("{} | {}".format(__name__, 'Connection error ...'))
+            self.logger.info("{} | {}".format(__name__, 'Connection error ...'))
 
     def run(self):
         """
@@ -53,7 +59,7 @@ class Client(object):
         """
         self.window.show()
         self.create_users()
-        sys.exit(self.gui_app.exec_())
+        sys.exit(self.app.exec_())
 
     def init_ui(self):
         """
@@ -77,11 +83,11 @@ class Client(object):
         ui.setupUi(self.window)
         # Set icons for font buttons
         ui.tb_b.setIcon(QIcon(os.path.join(
-            self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
+            self.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
         ui.tb_i.setIcon(QIcon(os.path.join(
-            self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
+            self.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
         ui.tb_u.setIcon(QIcon(os.path.join(
-            self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
+            self.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
         # Set icons for smile buttons
         ui.tb_smile_1.setIcon(QIcon(self.path_img_ab))
         ui.tb_smile_2.setIcon(QIcon(self.path_img_ac))
@@ -89,7 +95,7 @@ class Client(object):
         # Set icon for image edit dialog
         ui.tb_smile_4.setIcon(
             QIcon(os.path.join(
-                self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
+                self.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
         # Connect up the buttons.
         ui.send_button.clicked.connect(self.action_send_button_clicked)
         # Connect up the font buttons.
@@ -107,7 +113,7 @@ class Client(object):
     def create_users(self):
         users = ['cnn', 'egor', 'bobr']
         for user in users:
-            icon = QIcon(os.path.join(self.base_app.config.root_path, '..', 'upload', user + '.jpg'))
+            icon = QIcon(os.path.join(self.config.root_path, '..', 'upload', user + '.jpg'))
             item = QListWidgetItem(user)
             item.setIcon(icon)
             self.ui.dialogs_list.addItem(item)
@@ -117,9 +123,9 @@ class Client(object):
         future = asyncio.Future()
         self._loop.run_until_complete(self.send_message(text, future))
         if future.result() == 200:
-            self._logger.info("{} | {}".format(__name__, 'Message delivered ...'))
+            self.logger.info("{} | {}".format(__name__, 'Message delivered ...'))
         else:
-            self._logger.info("{} | {}".format(__name__, 'Request error ...'))
+            self.logger.info("{} | {}".format(__name__, 'Request error ...'))
         item = QListWidgetItem(text)
         self.ui.messanges_list.addItem(item)
         self.ui.messanger_edit.clear()
@@ -137,13 +143,13 @@ class Client(object):
 
     async def check_connection(self, future):
         async with aiohttp.ClientSession() as session:
-            url = 'http://{host}:{port}/'.format(host=self._host, port=self._port)
+            url = 'http://{host}:{port}/'.format(host=self.host, port=self.port)
             async with session.get(url) as resp:
                 future.set_result(resp.status)
 
     async def send_message(self, message, future):
         async with aiohttp.ClientSession() as session:
-            url = 'http://{host}:{port}/{user_id}/message'.format(host=self._host, port=self._port, user_id=1)
+            url = 'http://{host}:{port}/{user_id}/message'.format(host=self.host, port=self.port, user_id=1)
             async with session.post(url, json=message) as resp:
                 future.set_result(resp.status)
 

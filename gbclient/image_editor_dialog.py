@@ -26,12 +26,12 @@ from gbcore.image import Image
 
 class ImageEditorDialog(QDialog):
 
-    def __init__(self, base_app):
+    def __init__(self, config):
         QDialog.__init__(self)
-        self.base_app = base_app
-        self.path_img_ab = os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
-        self.path_img_ac = os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
-        self.path_img_ai = os.path.join(self.base_app.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
+        self.config = config
+        self.path_img_ab = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
+        self.path_img_ac = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
+        self.path_img_ai = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
         self.canvas = QLabel(self)
         self.canvas.setObjectName('canvas')
         self.init_ie_dialog()
