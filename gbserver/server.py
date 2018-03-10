@@ -15,11 +15,6 @@ import base64
 from cryptography import fernet
 
 
-# from gbcore import db
-# from gbcore.common.message import Message
-# from gbcore.common.user import User
-
-
 class Server(object):
 
     def __init__(self):

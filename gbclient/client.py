@@ -39,17 +39,9 @@ class Client(object):
         self.ui = self.init_ui()
         self.ie_dialog = ImageEditorDialog(self.config)
         self.font = QFont()
-        future = asyncio.Future()
-        self.loop.run_until_complete(self.check_connection(future))
-        if future.result() == 200:
-            self.logger.info("{} | {}".format(__name__, 'Server online ...'))
-        else:
-            self.logger.info("{} | {}".format(__name__, 'Connection error ...'))
+        asyncio.ensure_future(self.check_connection(), loop=self.loop)
 
     def run(self):
-        """
-        Run main gui application loop
-        """
         self.window.show()
         self.create_users()
         with self.loop:
@@ -113,16 +105,33 @@ class Client(object):
             self.ui.dialogs_list.addItem(item)
 
     def action_send_button_clicked(self):
-        text = self.ui.messanger_edit.toPlainText()
-        future = asyncio.Future()
-        self._loop.run_until_complete(self.send_message(text, future))
-        if future.result() == 200:
-            self.logger.info("{} | {}".format(__name__, 'Message delivered ...'))
-        else:
-            self.logger.info("{} | {}".format(__name__, 'Request error ...'))
-        item = QListWidgetItem(text)
-        self.ui.messanges_list.addItem(item)
-        self.ui.messanger_edit.clear()
+        asyncio.ensure_future(self.send_message('new'), loop=self.loop)
+        # text = self.ui.messanger_edit.toPlainText()
+        # future = asyncio.Future()
+        # self._loop.run_until_complete(self.send_message(text, future))
+        # if future.result() == 200:
+        #     self.logger.info("{} | {}".format(__name__, 'Message delivered ...'))
+        # else:
+        #     self.logger.info("{} | {}".format(__name__, 'Request error ...'))
+        # item = QListWidgetItem(text)
+        # self.ui.messanges_list.addItem(item)
+        # self.ui.messanger_edit.clear()
+
+    async def send_message(self, message):
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://api.github.com/events') as resp:
+                print(resp.status)
+                print(message)
+                print(await resp.text())
+
+    async def check_connection(self):
+        async with aiohttp.ClientSession() as session:
+            url = 'http://{host}:{port}/'.format(host=self.host, port=self.port)
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    self.logger.info("{} | {}".format(__name__, 'Server online ...'))
+                else:
+                    self.logger.info("{} | {}".format(__name__, 'Connection error ...'))
 
     def action_image_edit(self):
         self.ie_dialog.exec_()
@@ -134,45 +143,3 @@ class Client(object):
 
     def _insert_image(self, image_path):
         self.ui.messanger_edit.insertHtml('<img src="{image_path}" />'.format(image_path=image_path))
-
-    async def check_connection(self, future):
-        async with aiohttp.ClientSession() as session:
-            url = 'http://{host}:{port}/'.format(host=self.host, port=self.port)
-            async with session.get(url) as resp:
-                future.set_result(resp.status)
-
-    async def send_message(self, message, future):
-        async with aiohttp.ClientSession() as session:
-            url = 'http://{host}:{port}/{user_id}/message'.format(host=self.host, port=self.port, user_id=1)
-            async with session.post(url, json=message) as resp:
-                future.set_result(resp.status)
-
-    def send(self, message):
-        pass
-        # sess = db.session
-        # TODO for test
-        # user = User("User", "user@email.com", "Password")
-        # sess.add(user)
-        # sess.commit()
-        #
-        # message = Message(message, 1)
-        # sess.add(message)
-        # sess.commit()
-
-    # async def send_message_to_server(self, message, loop):
-    #     reader, writer = await asyncio.open_connection(
-    #         host=app.config['CLIENT']['HOST'],
-    #         port=app.config['CLIENT']['PORT'],
-    #         loop=loop
-    #     )
-    #     message = str(message)
-    #     print('Send: %r' % message)
-    #     writer.write(message.encode())
-    #     data = await reader.read(100)
-    #     print('Received: %r' % data.decode())
-    #     print('Close the socket')
-    #     writer.close()
-
-    # TODO сделать авторизацию на сервере
-    def __auth(self):
-        pass
