@@ -3,27 +3,21 @@
 
 import sys
 import os
-import aiohttp
-
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
-from quamash import QEventLoop, QThreadExecutor
+from quamash import QEventLoop
 from gbcore.config import make_config
 from gbcore.logger import make_logger
 from gbclient.image_editor_dialog import ImageEditorDialog
 from gbclient.templates.client_window import Ui_client_window
 import aiohttp
 import asyncio
-import async_timeout
 
 
 class Client(object):
-    """
-    Client application class
-    """
 
     def __init__(self):
         self.app = QApplication(sys.argv)
@@ -45,9 +39,8 @@ class Client(object):
         self.ui = self.init_ui()
         self.ie_dialog = ImageEditorDialog(self.config)
         self.font = QFont()
-        self._loop = asyncio.get_event_loop()
         future = asyncio.Future()
-        self._loop.run_until_complete(self.check_connection(future))
+        self.loop.run_until_complete(self.check_connection(future))
         if future.result() == 200:
             self.logger.info("{} | {}".format(__name__, 'Server online ...'))
         else:
@@ -59,7 +52,8 @@ class Client(object):
         """
         self.window.show()
         self.create_users()
-        sys.exit(self.app.exec_())
+        with self.loop:
+            self.loop.run_forever()
 
     def init_ui(self):
         """
