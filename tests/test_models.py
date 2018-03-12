@@ -4,8 +4,8 @@
 import pytest
 
 from gbcore import db
-from gbcore.user import User
-from gbcore.message import Message
+from gbclient.user import User
+from gbclient.message import Message
 
 
 class TestUser(object):

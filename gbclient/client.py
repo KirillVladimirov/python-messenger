@@ -15,6 +15,7 @@ from gbclient.image_editor_dialog import ImageEditorDialog
 from gbclient.templates.client_window import Ui_client_window
 import aiohttp
 import asyncio
+from gbclient.models import Db
 
 
 class MainWindow(QMainWindow):
@@ -98,18 +99,33 @@ class Client(object):
         asyncio.ensure_future(self.check_connection(), loop=self.loop)
         self.ws = None
         asyncio.ensure_future(self.listen_server(), loop=self.loop)
+        # TODO тестовые данные пользователей
+        self.display_users()
+        self.db = Db(self.loop, self.config)
+        asyncio.ensure_future(self.db.make_tables(), loop=self.loop)
+        asyncio.ensure_future(self.create_users(), loop=self.loop)
+        asyncio.ensure_future(self.get_user(), loop=self.loop)
+        self.user = None
 
     def run(self):
         self.window.show()
         self.loop.run_forever()
 
-    def create_users(self):
-        users = ['cnn', 'egor', 'bobr']
+    def display_users(self):
+        users = ['client_user_1', 'client_user_2']
         for user in users:
             icon = QIcon(os.path.join(self.config.root_path, '..', 'upload', user + '.jpg'))
             item = QListWidgetItem(user)
             item.setIcon(icon)
             self.ui.dialogs_list.addItem(item)
+
+    async def create_users(self):
+        await self.db.create_user('client_user_1', 'client_user_1@mail.ru', 'client_user_1')
+        await self.db.create_user('client_user_2', 'client_user_2@mail.ru', 'client_user_2')
+
+    async def get_user(self):
+        self.user = await self.db.get_user('client_user_1')
+        print(self.user)
 
     def action_send_button_clicked(self):
         message_text = self.ui.messanger_edit.toPlainText()
@@ -153,6 +169,7 @@ class Client(object):
 
     def display_message(self, message):
         self.ui.messanges_list.addItem(message)
+        asyncio.ensure_future(self.db.create_message(self.user, message), loop=self.loop)
         print('Received from server: {}'.format(message))
 
     def action_image_edit(self):
