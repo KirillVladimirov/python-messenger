@@ -71,6 +71,8 @@ class SocketWorker(web.View):
         async for msg in ws:
             print('type: ', msg.type)
             if msg.type == WSMsgType.TEXT:
+                message = Message(self.request.db)
+                await message.save(user=login, msg=msg.data)
                 print('Received from client: {}'.format(msg.data))
                 for _ws in self.request.app['websockets']:
                     await _ws.send_str('{}/answer.'.format(msg.data))
