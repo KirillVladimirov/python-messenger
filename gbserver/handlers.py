@@ -44,11 +44,9 @@ class SocketWorker(web.View):
         data = await self.request.post()
         # user_id = data.get('id')
         # print(data.get('id'))
-        print('ws')
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
         session = await get_session(self.request)
-        print(session)
         # user = User(self.request.db, id=user_id)
         # print(user)
         # user.get()
@@ -56,9 +54,8 @@ class SocketWorker(web.View):
         # login = await user.get_login()
         login = 'user1'
         for _ws in self.request.app['websockets']:
-            _ws.send_str('{} joined.'.format(login))
+            await _ws.send_str('{} joined.'.format(login))
         self.request.app['websockets'].append(ws)
-        print(self.request.app['websockets'])
         # async for msg in ws:
         #     if msg.tp == WSMsgType.TEXT:
         #         if msg.data == 'close':
@@ -72,19 +69,18 @@ class SocketWorker(web.View):
         #     elif msg.tp == WSMsgType.ERROR:
         #         print(ws.exception())
         async for msg in ws:
+            print('type: ', msg.type)
             if msg.type == WSMsgType.TEXT:
                 print('Received from client: {}'.format(msg.data))
-                if msg.data == 'close':
-                    await ws.close()
-                else:
-                    for _ws in self.request.app['websockets']:
-                        await _ws.send_str('{}/answer.'.format(msg.data))
-                    print('broadcast completed.')
+                for _ws in self.request.app['websockets']:
+                    await _ws.send_str('{}/answer.'.format(msg.data))
+                print('broadcast completed.')
+            elif msg.type == WSMsgType.CLOSE:
+                self.request.app['websockets'].remove(ws)
+                for _ws in self.request.app['websockets']:
+                    await _ws.send_str('{} disconnected.'.format(login))
+                print('websocket connection closed.')
 
-        self.request.app['websockets'].remove(ws)
-        for _ws in self.request.app['websockets']:
-            await _ws.send_str('{} disconnected.'.format(login))
-        print('websocket connection closed.')
         return ws
 
 

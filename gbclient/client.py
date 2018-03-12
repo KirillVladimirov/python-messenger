@@ -17,39 +17,15 @@ import aiohttp
 import asyncio
 
 
-class Client(object):
+class MainWindow(QMainWindow):
 
-    def __init__(self):
-        self.app = QApplication(sys.argv)
-        self.loop = QEventLoop(self.app)
-        asyncio.set_event_loop(self.loop)
+    def __init__(self, client, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        self.client = client
+        self.ui = Ui_client_window()
+        self.setupUi()
 
-        self.config = make_config(
-            os.path.join('config', 'env.json'))
-        self.logger = make_logger(self.config)
-        self.port = self.config['CLIENT']['PORT']
-        self.host = self.config['CLIENT']['HOST']
-        self.encode = self.config['CLIENT']['ENCODE']
-
-        self.path_img_ab = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
-        self.path_img_ac = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
-        self.path_img_ai = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
-
-        self.window = QMainWindow()
-        self.ui = self.init_ui()
-        self.ie_dialog = ImageEditorDialog(self.config)
-        self.font = QFont()
-        asyncio.ensure_future(self.check_connection(), loop=self.loop)
-        self.ws = None
-        asyncio.ensure_future(self.listen_server(), loop=self.loop)
-
-    def run(self):
-        self.window.show()
-        self.create_users()
-        with self.loop:
-            self.loop.run_forever()
-
-    def init_ui(self):
+    def setupUi(self):
         """
         Инициализация UI.
 
@@ -67,36 +43,65 @@ class Client(object):
             tb_smile_3 - кнопка, смаил 3
             tb_smile_4 - кнопка, смаил 4
         """
-        ui = Ui_client_window()
-        ui.setupUi(self.window)
+        self.ui.setupUi(self)
         # Set icons for font buttons
-        ui.tb_b.setIcon(QIcon(os.path.join(
-            self.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
-        ui.tb_i.setIcon(QIcon(os.path.join(
-            self.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
-        ui.tb_u.setIcon(QIcon(os.path.join(
-            self.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
+        self.ui.tb_b.setIcon(QIcon(os.path.join(
+            self.client.config.root_path, 'app', 'client', 'templates', 'imgs', 'b.jpg')))
+        self.ui.tb_i.setIcon(QIcon(os.path.join(
+            self.client.config.root_path, 'app', 'client', 'templates', 'imgs', 'i.jpg')))
+        self.ui.tb_u.setIcon(QIcon(os.path.join(
+            self.client.config.root_path, 'app', 'client', 'templates', 'imgs', 'u.jpg')))
         # Set icons for smile buttons
-        ui.tb_smile_1.setIcon(QIcon(self.path_img_ab))
-        ui.tb_smile_2.setIcon(QIcon(self.path_img_ac))
-        ui.tb_smile_3.setIcon(QIcon(self.path_img_ai))
+        self.ui.tb_smile_1.setIcon(QIcon(self.client.path_img_ab))
+        self.ui.tb_smile_2.setIcon(QIcon(self.client.path_img_ac))
+        self.ui.tb_smile_3.setIcon(QIcon(self.client.path_img_ai))
         # Set icon for image edit dialog
-        ui.tb_smile_4.setIcon(
+        self.ui.tb_smile_4.setIcon(
             QIcon(os.path.join(
-                self.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
+                self.client.config.root_path, 'app', 'client', 'templates', 'imgs', 'open.png')))
         # Connect up the buttons.
-        ui.send_button.clicked.connect(self.action_send_button_clicked)
+        self.ui.send_button.clicked.connect(self.client.action_send_button_clicked)
         # Connect up the font buttons.
-        ui.tb_b.clicked.connect(lambda: self._insert_html_tag('b'))
-        ui.tb_i.clicked.connect(lambda: self._insert_html_tag('i'))
-        ui.tb_u.clicked.connect(lambda: self._insert_html_tag('u'))
+        self.ui.tb_b.clicked.connect(lambda: self._insert_html_tag('b'))
+        self.ui.tb_i.clicked.connect(lambda: self._insert_html_tag('i'))
+        self.ui.tb_u.clicked.connect(lambda: self._insert_html_tag('u'))
         # Connect up smile buttons
-        ui.tb_smile_1.clicked.connect(lambda: self._insert_image(self.path_img_ab))
-        ui.tb_smile_2.clicked.connect(lambda: self._insert_image(self.path_img_ac))
-        ui.tb_smile_3.clicked.connect(lambda: self._insert_image(self.path_img_ai))
+        self.ui.tb_smile_1.clicked.connect(lambda: self._insert_image(self.path_img_ab))
+        self.ui.tb_smile_2.clicked.connect(lambda: self._insert_image(self.path_img_ac))
+        self.ui.tb_smile_3.clicked.connect(lambda: self._insert_image(self.path_img_ai))
         # Image edit dialog
-        ui.tb_smile_4.clicked.connect(self.action_image_edit)
-        return ui
+        self.ui.tb_smile_4.clicked.connect(self.client.action_image_edit)
+
+    def closeEvent(self, event):
+        asyncio.ensure_future(self.client.close_ws(), loop=self.client.loop)
+
+
+class Client(object):
+
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.loop = QEventLoop(self.app)
+        asyncio.set_event_loop(self.loop)
+        self.config = make_config(
+            os.path.join('config', 'env.json'))
+        self.logger = make_logger(self.config)
+        self.port = self.config['CLIENT']['PORT']
+        self.host = self.config['CLIENT']['HOST']
+        self.encode = self.config['CLIENT']['ENCODE']
+        self.path_img_ab = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ab.gif')
+        self.path_img_ac = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ac.gif')
+        self.path_img_ai = os.path.join(self.config.root_path, 'app', 'client', 'templates', 'imgs', 'ai.gif')
+        self.window = MainWindow(self)
+        self.ui = self.window.ui
+        self.ie_dialog = ImageEditorDialog(self.config)
+        self.font = QFont()
+        asyncio.ensure_future(self.check_connection(), loop=self.loop)
+        self.ws = None
+        asyncio.ensure_future(self.listen_server(), loop=self.loop)
+
+    def run(self):
+        self.window.show()
+        self.loop.run_forever()
 
     def create_users(self):
         users = ['cnn', 'egor', 'bobr']
@@ -112,8 +117,6 @@ class Client(object):
         self.ui.messanger_edit.clear()
 
     async def send_message(self, message):
-        # session = aiohttp.ClientSession()
-        # async with session.ws_connect('http://{host}:{port}/send'.format(host=self.host, port=self.port)) as ws:
         await self.ws.send_str(message)
 
     async def listen_server(self):
@@ -121,12 +124,13 @@ class Client(object):
         self.ws = await session.ws_connect('http://{host}:{port}/send'.format(host=self.host, port=self.port))
         async for msg in self.ws:
             if msg.type == aiohttp.WSMsgType.TEXT:
-                print(msg.data)
                 self.display_message(msg.data)
             elif msg.type == aiohttp.WSMsgType.CLOSED:
                 break
             elif msg.type == aiohttp.WSMsgType.ERROR:
                 break
+
+    async def close_ws(self):
         await self.ws.close()
 
     async def check_connection(self):
