@@ -4,7 +4,7 @@ Geekmessenge is the simple messenger on Python.
 - **Bug reports:** https://github.com/KirillVladimirov/python-messenger/issues
 
 
-**It provides**:
+### It provides:
 
 - a simple multithreading server, it can listening many clients
 - a simple multithreading client with gui
@@ -12,10 +12,14 @@ Geekmessenge is the simple messenger on Python.
 - authenticate client on server and can dialogs with other clients
 
 
-**Install**:
+### Install:
 - pip install -r requirements.txt
 - cp geekmessenger/config/env.json.sample geekmessenger/config/env.json
 
+
+### Testing
+
+python -m pytest tests/test_server.py
 
 Google Python Style Guide:
 http://google.github.io/styleguide/pyguide.html

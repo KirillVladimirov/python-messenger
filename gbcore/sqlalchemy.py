@@ -5,15 +5,21 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import DisconnectionError
+import os
+
+
+def make_db(config_dict):
+    sql_path = os.path.join(config_dict["APPLICATION_ROOT"], "sql", config_dict["SQLALCHEMY"]["DB"])
+    sql_uri = "sqlite:///{}".format(sql_path)
+    return SQLAlchemy(config_dict, sql_uri)
 
 
 class SQLAlchemy(object):
-
     DB_BASE = declarative_base()
 
-    def __init__(self, app, config_db_uri):
-        self._app = app
-        if self._app.config["DEBUG_LEVEL"] == "DEBUG":
+    def __init__(self, config_dict, config_db_uri):
+        self.config = config_dict
+        if self.config["DEBUG_LEVEL"] is "DEBUG":
             echo = True
         else:
             echo = False

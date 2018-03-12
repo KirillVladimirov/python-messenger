@@ -13,3 +13,8 @@ aiohttp
 cchardet
 aiodns
 aiohttp_security
+motor
+aiohttp_session[secure]
+cryptography
+bson
+quamash
